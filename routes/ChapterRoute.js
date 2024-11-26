@@ -2,36 +2,24 @@ import express from "express";
 const router = express.Router();
 
 import {
-  registerArtist,
-  getAllArtist,
-  getArtistById,
-  updateArtistData,
-  deleteArtistImage,
-  uploadArtistImage,
-  deleteArtist,
-  getArtistDataBySearchKeyword,
-  getAllPaginatedArtistData,
-  getArtistDataBySearchKeywordPaginated,
+  createChapter,
+  getAllChapter,
+  getChapterById,
+  updateChapter,
+  deleteChapter,
+  getPaginatedChaptersData,
 } from "../controllers/ChapterController.js";
 
-router.post("/register", registerArtist);
+router.post("/create", createChapter);
 
-router.get("/getall", getAllArtist);
+router.get("/getall", getAllChapter);
 
-router.post("/getbyId", getArtistById);
+router.post("/getbyId", getChapterById);
 
-router.post("/update/data", updateArtistData);
+router.post("/updatebyId", updateChapter);
 
-router.post("/deleteArtist/image", deleteArtistImage);
+router.post("/deletebyId", deleteChapter);
 
-router.post("/upload/image", uploadArtistImage);
-
-router.post("/delete", deleteArtist);
-
-router.post("/getArtistDataBySearchKeyword", getArtistDataBySearchKeyword);
-
-router.post("/getallpaginatedData", getAllPaginatedArtistData);
-
-router.post("/getPaginatedSearch", getArtistDataBySearchKeywordPaginated);
+router.post("/getallpaginatedData", getPaginatedChaptersData);
 
 export default router;

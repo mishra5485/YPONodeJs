@@ -34,21 +34,7 @@ const SendDefaultPasswordMail = {
 };
 
 const ImagesPath = {
-  ArtistImageFolderPath: "uploads/Artist/",
-  CategoryImageFolderPath: "uploads/Category/",
-  EventTourImageFolderPath: "uploads/EventTour/",
-  VenueImageFolderPath: "uploads/Venue/",
-  GenreImageFolderPath: "uploads/Genre/",
-  SuperAdminProfileFolderPath: "uploads/SuperAdminProfile/",
-  OrganizerProfileFolderPath: "uploads/OrganizerProfile/",
-  PromoterProfileFolderPath: "uploads/PromoterProfile/",
-  CustomerProfileFolderPath: "uploads/CustomerProfile/",
-  EventCarouselImagePath: "uploads/EventCarousel/",
-  EventGalleryImagePath: "uploads/EventGallery/",
-  EventVenueLayoutImagePath: "uploads/EventVenueLayout/",
-  DesktopHomeBannerSliderImagePath: "uploads/DesktopHomeBanner/",
-  MobileHomeBannerSliderImagePath: "uploads/MobileHomeBanner/",
-  QrCodeImagePath: "uploads/QrCode/",
+  ChapterLogoFolderPath: "uploads/ChapterLogos/",
 };
 
 const ImagesUrls = {

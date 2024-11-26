@@ -1,118 +1,86 @@
 import { Chapters } from "../models/AllModels.js";
 
-const fetchArtistDetailsFromDbService = async (artistIds) => {
-  const FetchArtistDetails = await Promise.all(
-    artistIds.map(async (data) => {
-      const isArtistExists = await Artist.findOne({
-        _id: data.artist_id,
-      });
-      return !isArtistExists ? data : null;
-    })
-  );
-  const notFoundArtists = FetchArtistDetails.filter((data) => data !== null);
-  return notFoundArtists;
-};
-
-const createArtistService = async (artistData) => {
+const createChapterService = async (ChapterData) => {
   try {
-    const newArtist = new Artist(artistData);
-    await newArtist.save();
-    return newArtist;
+    const newChapter = new Chapters(ChapterData);
+    await newChapter.save();
+    return newChapter;
   } catch (error) {
-    console.error("Error creating artist:", error);
-    throw new Error("Failed to create artist");
+    console.error("Error creating chapter:", error);
+    throw new Error("Failed to create chapter");
   }
 };
 
-const findOneArtistDataService = async (filterquery) => {
+const getAllChapterDataService = async (filterquery) => {
   try {
-    const ArtistData = await Artist.findOne(filterquery);
-    return ArtistData;
+    const ChaptersData = await Chapters.find(filterquery);
+    return ChaptersData;
   } catch (error) {
-    console.error("Error finding One artist Data:", error);
-    throw new Error("Failed to Finding One artist Data");
+    console.error("Error finding fetching chapter Data:", error);
+    throw new Error("Failed to Finding fetching chapter Data");
   }
 };
 
-const getOtherArtistsService = async (currentArtistId) => {
+const findOneChapterDataService = async (filterquery) => {
   try {
-    return await Artist.find({ _id: { $ne: currentArtistId } });
+    const ChapterData = await Chapters.findOne(filterquery);
+    return ChapterData;
   } catch (error) {
-    console.error("Error finding One artist Data:", error);
-    throw new Error("Failed to Finding One artist Data");
+    console.error("Error finding One Chapter Data:", error);
+    throw new Error("Failed to Finding One Chapter Data");
   }
 };
 
-const getArtistDataService = async (filterquery) => {
+const updateChapterDataService = async (filterquery, updateQuery) => {
   try {
-    const ArtistData = await Artist.find(filterquery);
-    return ArtistData;
+    const ChapterData = await Chapters.findByIdAndUpdate(
+      filterquery,
+      updateQuery
+    );
+    return ChapterData;
   } catch (error) {
-    console.error("Error finding fetching artist Data:", error);
-    throw new Error("Failed to Finding fetching artist Data");
+    console.error("Error finding fetching chapter Data:", error);
+    throw new Error("Failed to Finding fetching chapter Data");
   }
 };
 
-const getArtistByIdService = async (artist_id) => {
+const deleteChapterByIdService = async (filterQuery) => {
   try {
-    const ArtistData = await Artist.findById(artist_id);
-    return ArtistData;
-  } catch (error) {
-    console.error("Error finding fetching artist Data by Id:", error);
-    throw new Error("Failed to Finding fetching artist Data by Id");
-  }
-};
-
-const updateArtistDataService = async (filterquery, updateQuery) => {
-  try {
-    const ArtistData = await Artist.findByIdAndUpdate(filterquery, updateQuery);
-    return ArtistData;
-  } catch (error) {
-    console.error("Error finding fetching artist Data:", error);
-    throw new Error("Failed to Finding fetching artist Data");
-  }
-};
-
-const deleteArtistByIdService = async (filterQuery) => {
-  try {
-    const result = await Artist.deleteOne(filterQuery);
+    const result = await Chapters.deleteOne(filterQuery);
     return result;
   } catch (error) {
-    console.error("Error deleting artist Data by Id:", error);
-    throw new Error("Failed to deleting artist Data by Id");
+    console.error("Error deleting chapter Data by Id:", error);
+    throw new Error("Failed to deleting chapter Data by Id");
   }
 };
 
-const getPaginatedArtistData = async (filterQuery, limit, skip) => {
+const getPaginatedChapterData = async (filterQuery, limit, skip) => {
   try {
-    return await Artist.find(filterQuery)
+    return await Chapters.find(filterQuery)
       .sort({ createdAt: -1 })
       .limit(limit)
       .skip(skip);
   } catch (error) {
-    console.error("Error in fetching paginated Artist Data:", error);
+    console.error("Error in fetching paginated Chapters Data:", error);
     throw error;
   }
 };
 
-const countArtists = async (filterQuery) => {
+const countChapters = async (filterQuery) => {
   try {
-    return await Artist.countDocuments(filterQuery);
+    return await Chapters.countDocuments(filterQuery);
   } catch (error) {
-    console.error("Error in counting Artist Data:", error);
+    console.error("Error in counting Chapters Data:", error);
     throw error;
   }
 };
 
 export {
-  fetchArtistDetailsFromDbService,
-  createArtistService,
-  findOneArtistDataService,
-  getOtherArtistsService,
-  getArtistDataService,
-  getArtistByIdService,
-  updateArtistDataService,
-  deleteArtistByIdService,
-  getPaginatedArtistData,
-  countArtists,
+  createChapterService,
+  getAllChapterDataService,
+  findOneChapterDataService,
+  updateChapterDataService,
+  deleteChapterByIdService,
+  getPaginatedChapterData,
+  countChapters,
 };

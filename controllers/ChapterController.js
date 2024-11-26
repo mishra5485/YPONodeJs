@@ -1,25 +1,16 @@
-import {
-  validateArtistDataUpdate,
-  validateImageDelete,
-  validateArtistImageUpload,
-  validateSearchQuery,
-} from "../validations/index.js";
 import getCurrentDateTime from "../helpers/getCurrentDateTime.js";
 import { v4 as uuidv4 } from "uuid";
 import sendResponse from "../helpers/sendResponse.js";
-import path from "path";
-import fs from "fs/promises";
+import * as fs from "fs";
 import { ImagesPath } from "../helpers/Enum.js";
 import { configureMulter } from "../helpers/MulterConfig.js";
 import {
-  createArtistService,
-  findOneArtistDataService,
-  getArtistDataService,
-  getArtistByIdService,
-  updateArtistDataService,
-  deleteArtistByIdService,
-  getPaginatedArtistData,
-  countArtists,
+  createChapterService,
+  getAllChapterDataService,
+  findOneChapterDataService,
+  deleteChapterByIdService,
+  getPaginatedChapterData,
+  countChapters,
 } from "../services/ChapterServices.js";
 import { getAsiaCalcuttaCurrentDateTimeinIsoFormat } from "../helpers/DateTime.js";
 import { sanitizeFileName } from "../helpers/commonFunctions.js";
@@ -29,479 +20,273 @@ const handleMulterError = (err, res) => {
   return sendResponse(res, 500, true, "Multer Error", err.message);
 };
 
-const registerArtist = async (req, res) => {
+const createChapter = async (req, res) => {
   try {
-    const fieldsConfig = [{ name: "Images", maxCount: 5 }];
+    const fieldsConfig = [{ name: "ChapterLogoImage", maxCount: 1 }];
     const upload = configureMulter(fieldsConfig);
 
-    upload(req, res, async function (err) {
-      if (err) return handleMulterError(err, res);
-
-      console.log("Register Artist Api Called");
-      console.log("Req Body Parameters:-----> " + JSON.stringify(req.body));
-
-      let { Name, Email, Description, PhoneNo } = req.body;
-
-      // Name is required
-      if (!Name || !Name.trim()) {
-        return sendResponse(res, 400, true, "Artist Name is required");
+    upload(req, res, async (err) => {
+      if (err) {
+        return handleMulterError(err, res);
       }
 
-      const trimmedName = Name.trim();
+      console.log("Create Chapter API Called");
+      console.log("Req Body Parameters:----->", req.body);
 
-      // Image is required
-      if (!req.files.Images || !req.files.Images.length) {
-        return sendResponse(res, 400, true, "Artist Image is required");
+      const { chapter_Name, chapter_Region = "South Asia" } = req.body;
+
+      // Validate Chapter Name
+      if (!chapter_Name || !chapter_Name.trim()) {
+        return sendResponse(res, 400, true, "Chapter Name is required");
       }
 
-      // Normalize optional fields
-      const normalizedEmail = Email ? Email.trim().toLowerCase() : null;
-      const description = Description ? Description.trim() : null;
-      const phoneNo = PhoneNo ? PhoneNo.trim() : null;
-
-      const nameRegex = new RegExp("^" + trimmedName + "$", "i");
-      const emailRegex = normalizedEmail
-        ? new RegExp("^" + normalizedEmail + "$", "i")
-        : null;
-
-      // Construct filter query based on available data
-      const filterquery = {
-        $or: [
-          { Name: nameRegex },
-          ...(normalizedEmail ? [{ Email: emailRegex }] : []),
-        ],
-      };
-
-      const existingArtist = await findOneArtistDataService(filterquery);
-
-      if (existingArtist) {
-        const conflictField =
-          existingArtist.Name.toLowerCase() == trimmedName.toLowerCase()
-            ? "Artist Name"
-            : "Artist Email";
-        return sendResponse(res, 409, true, `${conflictField} Already Exists`);
+      // Validate Chapter Logo Image
+      if (!req.files || !req.files.ChapterLogoImage) {
+        return sendResponse(res, 400, true, "Chapter Logo Image is required");
       }
 
-      // Process Images
-      const ArtistImages = await Promise.all(
-        req.files.Images.map(async (file) => {
-          const ArtistImageFolderPath = ImagesPath.ArtistImageFolderPath;
-          await fs.mkdir(ArtistImageFolderPath, { recursive: true });
-          const updatedfilename = sanitizeFileName(file.originalname);
-          const ArtistImagePath = path.join(
-            ArtistImageFolderPath,
-            `${Date.now()}-${updatedfilename}`
-          );
-          await fs.writeFile(ArtistImagePath, file.buffer);
-          return { image_path: ArtistImagePath };
-        })
+      const trimmedChapterName = chapter_Name.trim();
+      const nameRegex = new RegExp(`^${trimmedChapterName}$`, "i");
+
+      const filterQuery = { chapter_Name: nameRegex };
+
+      // Check if Chapter Name already exists
+      const existingChapter = await findOneChapterDataService(filterQuery);
+      if (existingChapter) {
+        return sendResponse(res, 409, true, "Chapter Name Already Exists");
+      }
+
+      // Ensure Chapter Logo Image folder exists
+      const chapterLogoImageFolderPath = ImagesPath.ChapterLogoFolderPath;
+      if (!fs.existsSync(chapterLogoImageFolderPath)) {
+        fs.mkdirSync(chapterLogoImageFolderPath, { recursive: true });
+      }
+
+      // Save Chapter Logo Image
+      const updatedChapterLogoImageFilename = sanitizeFileName(
+        req.files.ChapterLogoImage[0].originalname
       );
+      const chapterLogoImagePath = `${chapterLogoImageFolderPath}${Date.now()}-${updatedChapterLogoImageFilename}`;
 
-      // Construct the artist object
-      const artistObj = {
+      try {
+        fs.writeFileSync(
+          chapterLogoImagePath,
+          req.files.ChapterLogoImage[0].buffer
+        );
+      } catch (fileError) {
+        console.error("Error saving Chapter Logo Image:", fileError);
+        return sendResponse(res, 500, true, "Error saving Chapter Logo Image");
+      }
+
+      // Prepare Chapter Object
+      const chapterObj = {
         _id: uuidv4(),
-        Name: trimmedName,
-        Email: normalizedEmail,
-        Description: description,
-        Images: ArtistImages,
-        PhoneNo: phoneNo,
-        FilterationDateTime: getAsiaCalcuttaCurrentDateTimeinIsoFormat(),
+        chapter_Name: trimmedChapterName,
+        chapter_Logo: chapterLogoImagePath,
+        chapter_Region,
         createdAt: getCurrentDateTime(),
+        FilterationDateTime: getAsiaCalcuttaCurrentDateTimeinIsoFormat(),
       };
 
-      const newArtist = await createArtistService(artistObj);
-
-      return sendResponse(
-        res,
-        201,
-        false,
-        "Artist Registered successfully",
-        newArtist
-      );
+      // Save Chapter Data
+      try {
+        const newChapter = await createChapterService(chapterObj);
+        return sendResponse(
+          res,
+          201,
+          false,
+          "Chapter Created successfully",
+          newChapter
+        );
+      } catch (dbError) {
+        console.error("Error creating Chapter in database:", dbError);
+        return sendResponse(res, 500, true, "Error creating Chapter");
+      }
     });
   } catch (error) {
-    console.error("Register Artist Error:", error.message);
+    console.error("Create Chapter Error:", error);
     return sendResponse(res, 500, true, "Internal Server Error");
   }
 };
 
-const getAllArtist = async (req, res) => {
+const getAllChapter = async (req, res) => {
   try {
-    console.log("Get All Artist API Called");
+    console.log("Get All Chapter Data API Called");
 
-    const filterQuery = { status: 1 };
-    const ArtistData = await getArtistDataService({});
+    const allChaptersData = await getAllChapterDataService({});
 
-    if (!ArtistData.length) {
-      return sendResponse(res, 404, true, "Artist not found");
+    if (!allChaptersData.length) {
+      return sendResponse(res, 404, true, "Chapters not found");
     }
     return sendResponse(
       res,
       200,
       false,
-      "Artists fetched successfully",
-      ArtistData
+      "Chapters fetched successfully",
+      allChaptersData
     );
   } catch (error) {
-    console.error("Error in fetching Artist Data:", error);
+    console.error("Error in fetching Chapters Data:", error);
     return sendResponse(res, 500, true, "Internal Server Error");
   }
 };
 
-const getArtistById = async (req, res) => {
+const getChapterById = async (req, res) => {
   try {
-    console.log("Get Artist By Id Api Called");
-    console.log("Artist Id:-----> " + JSON.stringify(req.body.artist_id));
+    console.log("Get Chapter By Id Api Called");
+    console.log("Chapter Id:-----> " + JSON.stringify(req.body.chapter_id));
 
-    const { artist_id } = req.body;
-    if (!artist_id) {
-      return sendResponse(res, 404, true, "Artist Id not Provided");
+    const { chapter_id } = req.body;
+    if (!chapter_id) {
+      return sendResponse(res, 404, true, "Chapter Id not Provided");
     }
 
-    const artist = await getArtistByIdService(artist_id);
+    const ChapterDetails = await findOneChapterDataService({ _id: chapter_id });
 
-    if (!artist) {
-      return sendResponse(res, 404, true, "Artist not found");
+    if (!ChapterDetails) {
+      return sendResponse(res, 404, true, "Chapter Details not found");
     }
-    return sendResponse(res, 200, false, "Artist fetched successfully", artist);
-  } catch (error) {
-    console.error("Get Artist By Id Error:", error.message);
-    return sendResponse(res, 500, true, "Internal Server Error");
-  }
-};
-
-const updateArtistData = async (req, res) => {
-  try {
-    console.log("Update Artist Api Called");
-    console.log("Req Body Parameters:-----> " + JSON.stringify(req.body));
-
-    // const validationResponse = await validateArtistDataUpdate(req.body);
-    // if (validationResponse.error) {
-    //   return sendResponse(res, 400, true, validationResponse.errorMessage);
-    // }
-
-    let { Name, Email, Description, PhoneNo, artist_id } = req.body;
-    Name = Name ? Name.trim() : null;
-    Email = Email ? Email.trim().toLowerCase() : null;
-    PhoneNo = PhoneNo ? PhoneNo : null;
-    Description = Description ? Description.trim() : null;
-
-    const artist = await getArtistByIdService(artist_id);
-    if (!artist) {
-      return sendResponse(res, 404, true, "Artist not found");
-    }
-
-    // Check for Name conflict
-    if (Name) {
-      const filterQuery = {
-        _id: { $ne: artist_id },
-        Name: { $regex: new RegExp("^" + Name + "$", "i") },
-      };
-
-      const existingNameArtist = await findOneArtistDataService(filterQuery);
-
-      if (existingNameArtist) {
-        return sendResponse(res, 409, true, "Artist Name Already Exists");
-      }
-
-      artist.Name = Name;
-    }
-
-    // Check for Email conflict
-    if (Email) {
-      const filterQuery = {
-        _id: { $ne: artist_id },
-        Email,
-      };
-
-      const existingEmailArtist = await findOneArtistDataService(filterQuery);
-
-      if (existingEmailArtist) {
-        return sendResponse(res, 409, true, "Artist Email Already Exists");
-      }
-
-      artist.Email = Email;
-    } else {
-      artist.Email = null;
-    }
-
-    artist.Description = Description;
-
-    artist.PhoneNo = PhoneNo;
-
-    await artist.save();
-    return sendResponse(res, 200, false, "Artist updated successfully", artist);
-  } catch (error) {
-    console.error("Update Artist Error:", error.message);
-    return sendResponse(res, 500, true, "Internal Server Error");
-  }
-};
-
-const deleteArtistImage = async (req, res) => {
-  try {
-    const validationResponse = await validateImageDelete(req.body);
-    if (validationResponse.error) {
-      return sendResponse(res, 400, true, validationResponse.errorMessage);
-    }
-
-    const { artist_id, image_id } = req.body;
-
-    console.log("Delete Artist Image Api Called");
-    console.log("Req Body Parameters:-----> " + JSON.stringify(req.body));
-
-    const isArtistExists = await getArtistByIdService(artist_id);
-
-    if (!isArtistExists) {
-      return sendResponse(res, 404, true, "Artist not found");
-    }
-
-    const ArtistImagesArray = isArtistExists.Images;
-
-    const ImagesFoundwithId = ArtistImagesArray.filter((data) => {
-      return data._id == image_id;
-    });
-
-    if (ImagesFoundwithId.length == 0) {
-      return sendResponse(res, 404, true, "Artist Image not found");
-    }
-
-    const ToBeRemovedImageData = ImagesFoundwithId[0];
-
-    await fs.unlink(path.join(ToBeRemovedImageData.image_path));
-
-    const UpdatedImagesAfterDeletion = ArtistImagesArray.filter((data) => {
-      return data._id != image_id;
-    });
-
-    const filterQuery = {
-      _id: artist_id,
-    };
-
-    const updateQuery = {
-      Images: UpdatedImagesAfterDeletion,
-    };
-
-    await updateArtistDataService(filterQuery, updateQuery);
-
-    return sendResponse(res, 200, false, "Artist Image Deleted Successfully");
-  } catch (error) {
-    console.error("Delete Artist Image Error:", error.message);
-    return sendResponse(res, 500, true, "Internal Server Error");
-  }
-};
-
-const uploadArtistImage = async (req, res) => {
-  try {
-    const fieldsConfig = [{ name: "ArtistImage", maxCount: 1 }];
-    const upload = configureMulter(fieldsConfig);
-
-    upload(req, res, async function (err) {
-      if (err) return handleMulterError(err, res);
-
-      const validationResponse = await validateArtistImageUpload(req.body);
-      if (validationResponse.error) {
-        return sendResponse(res, 400, true, validationResponse.errorMessage);
-      }
-
-      const { artist_id } = req.body;
-
-      console.log("Upload Artist Image API called");
-      console.log("Request Body Parameters:-----> ", req.body);
-
-      if (!req.files.ArtistImage) {
-        return sendResponse(res, 400, true, "Artist Image not provided");
-      }
-
-      const artist = await getArtistByIdService(artist_id);
-      if (!artist) {
-        return sendResponse(res, 404, true, "Artist not found");
-      }
-
-      const SingleArtistImage = req.files.ArtistImage[0];
-      const ArtistImageFolderPath = ImagesPath.ArtistImageFolderPath;
-      await fs.mkdir(ArtistImageFolderPath, { recursive: true });
-      const updatedfilename = sanitizeFileName(SingleArtistImage.originalname);
-      const ArtistImagePath = path.join(
-        ArtistImageFolderPath,
-        `${Date.now()}-${updatedfilename}`
-      );
-      await fs.writeFile(ArtistImagePath, SingleArtistImage.buffer);
-
-      const NewImagePathObject = { image_path: ArtistImagePath };
-      artist.Images.push(NewImagePathObject);
-
-      await artist.save();
-
-      return sendResponse(
-        res,
-        201,
-        false,
-        "Artist Image uploaded successfully",
-        artist.Images
-      );
-    });
-  } catch (error) {
-    console.error("Upload Artist Image Error:", error.message);
-    return sendResponse(res, 500, true, "Internal Server Error");
-  }
-};
-
-const deleteArtist = async (req, res) => {
-  try {
-    const { artist_id } = req.body;
-    if (!artist_id) {
-      return sendResponse(res, 404, true, "Artist Id not Provided");
-    }
-    console.log("Delete Artist Api Called");
-    console.log("Artist Id:-----> " + JSON.stringify(req.body.artist_id));
-
-    const artist = await getArtistByIdService(artist_id);
-
-    if (!artist) {
-      return sendResponse(res, 404, true, "Artist not found");
-    }
-
-    await Promise.all(
-      artist.Images.map(async (image) => {
-        await fs.unlink(image.image_path);
-      })
-    );
-
-    const deleteQuery = {
-      _id: artist_id,
-    };
-    const result = await deleteArtistByIdService(deleteQuery);
-
-    if (result.deletedCount == 1) {
-      return sendResponse(res, 200, false, "Artist Deleted Successfully");
-    } else {
-      return sendResponse(res, 409, false, "Failed to Delete Artist");
-    }
-  } catch (error) {
-    console.error("Delete Artist Error:", error.message);
-    return sendResponse(res, 500, true, "Internal Server Error");
-  }
-};
-
-const getArtistDataBySearchKeyword = async (req, res) => {
-  try {
-    console.log("Search Get Artist Data by Search Keyword API Called");
-    console.log("Req Body Parameters:-----> " + JSON.stringify(req.body));
-
-    const validationResponse = await validateSearchQuery(req.body);
-    if (validationResponse.error) {
-      return sendResponse(res, 400, true, validationResponse.errorMessage);
-    }
-
-    const { search_keyword } = req.body;
-    const trimmedSearchKeyWord = search_keyword.trim();
-
-    const filterQuery = {
-      Name: { $regex: new RegExp(trimmedSearchKeyWord, "i") },
-    };
-
-    const ArtistData = await getArtistDataService(filterQuery);
-
-    if (!ArtistData.length) {
-      return sendResponse(res, 404, true, "Artist not found");
-    }
-
     return sendResponse(
       res,
       200,
       false,
-      "Artist fetched successfully",
-      ArtistData
+      "Chapter Details fetched successfully",
+      ChapterDetails
     );
   } catch (error) {
-    console.error("Error in fetching Artist Data from Search Keyword:", error);
+    console.error("Get Chapter By Id Error:", error.message);
     return sendResponse(res, 500, true, "Internal Server Error");
   }
 };
 
-const getArtistDataBySearchKeywordPaginated = async (req, res) => {
+const updateChapter = async (req, res) => {
   try {
-    console.log("Search Get Artist Data by Search Keyword API Called");
+    console.log("Update Chapter Details By Id Api Called");
     console.log("Req Body Parameters:-----> " + JSON.stringify(req.body));
 
-    const { search_keyword } = req.body;
+    let { chapter_Name, chapter_Region, chapter_id } = req.body;
 
-    if (!search_keyword) {
-      return sendResponse(res, 400, true, "Search Keyword is required");
-    }
-    const trimmedSearchKeyWord = search_keyword.trim();
+    chapter_Name = chapter_Name ? chapter_Name.trim() : null;
+    chapter_Region = chapter_Region ? chapter_Region.trim() : null;
 
-    const filterQuery = {
-      Name: { $regex: new RegExp(trimmedSearchKeyWord, "i") },
-    };
-
-    const page = parseInt(req.body.page) || 1;
-    const limit = parseInt(req.body.limit) || 10;
-    const skip = (page - 1) * limit;
-
-    // Get paginated artist data
-    const ArtistData = await getPaginatedArtistData(filterQuery, limit, skip);
-
-    if (!ArtistData.length) {
-      return sendResponse(res, 404, true, "Artist not found");
+    const chapterExists = await findOneChapterDataService({ _id: chapter_id });
+    if (!chapterExists) {
+      return sendResponse(res, 404, true, "Chapter not found");
     }
 
-    const totalArtists = await countArtists(filterQuery);
+    if (chapter_Name) {
+      const filterQuery = {
+        _id: { $ne: chapter_id },
+        chapter_Name: { $regex: new RegExp("^" + chapter_Name + "$", "i") },
+      };
 
-    return sendResponse(res, 200, false, "Artists fetched successfully", {
-      totalPages: Math.ceil(totalArtists / limit),
-      currentPage: page,
-      totalArtists,
-      ArtistData: ArtistData,
-    });
+      const existingChapterName = await findOneChapterDataService(filterQuery);
+
+      if (existingChapterName) {
+        return sendResponse(res, 409, true, "Chapter Name Already Exists");
+      }
+
+      chapterExists.chapter_Name = chapter_Name;
+    }
+
+    await chapterExists.save();
+    return sendResponse(
+      res,
+      200,
+      false,
+      "Chapter updated successfully",
+      chapterExists
+    );
   } catch (error) {
-    console.error("Error in fetching Artist Data from Search Keyword:", error);
+    console.error("Update Chapter Error:", error.message);
     return sendResponse(res, 500, true, "Internal Server Error");
   }
 };
 
-const getAllPaginatedArtistData = async (req, res) => {
+const deleteChapter = async (req, res) => {
   try {
-    console.log("Get All Artist API Called");
+    const { chapter_id } = req.body;
+
+    if (!chapter_id) {
+      return sendResponse(res, 400, true, "Chapter ID not provided");
+    }
+
+    console.log("Delete Chapter API Called");
+    console.log("Chapter ID: ----->", chapter_id);
+
+    // Fetch Chapter Data
+    const chapterData = await findOneChapterDataService({ _id: chapter_id });
+
+    if (!chapterData) {
+      return sendResponse(res, 404, true, "Chapter not found");
+    }
+
+    const chapterLogoImagePath = chapterData.chapter_Logo;
+
+    // Remove Chapter Logo Image
+    try {
+      if (fs.existsSync(chapterLogoImagePath)) {
+        fs.unlinkSync(chapterLogoImagePath);
+      }
+    } catch (fileError) {
+      console.error("Error deleting Chapter Logo Image:", fileError);
+      return sendResponse(res, 500, true, "Error deleting Chapter Logo Image");
+    }
+
+    // Delete Chapter from Database
+    try {
+      const deleteQuery = { _id: chapter_id };
+      const result = await deleteChapterByIdService(deleteQuery);
+
+      if (result.deletedCount === 1) {
+        return sendResponse(res, 200, false, "Chapter deleted successfully");
+      } else {
+        return sendResponse(res, 409, true, "Failed to delete Chapter");
+      }
+    } catch (dbError) {
+      console.error("Error deleting Chapter from database:", dbError);
+      return sendResponse(res, 500, true, "Error deleting Chapter");
+    }
+  } catch (error) {
+    console.error("Delete Chapter Error:", error);
+    return sendResponse(res, 500, true, "Internal Server Error");
+  }
+};
+
+const getPaginatedChaptersData = async (req, res) => {
+  try {
+    console.log("Get All Chapter API Called");
     console.log("Req Body Parameters:-----> " + JSON.stringify(req.body));
 
     const page = parseInt(req.body.page) || 1;
     const limit = parseInt(req.body.limit) || 10;
     const skip = (page - 1) * limit;
 
-    const filterQuery = { status: 1 };
+    const ChapterData = await getPaginatedChapterData({}, limit, skip);
 
-    // Get paginated artist data
-    const ArtistData = await getPaginatedArtistData({}, limit, skip);
-
-    if (!ArtistData.length) {
-      return sendResponse(res, 404, true, "Artist not found");
+    if (!ChapterData.length) {
+      return sendResponse(res, 404, true, "Chapter not found");
     }
 
-    // Get the total number of artists for pagination
-    const totalArtists = await countArtists({});
+    const totalChapters = await countChapters({});
 
-    return sendResponse(res, 200, false, "Artists fetched successfully", {
-      totalPages: Math.ceil(totalArtists / limit),
+    return sendResponse(res, 200, false, "Chapters fetched successfully", {
+      totalPages: Math.ceil(totalChapters / limit),
       currentPage: page,
-      totalArtists,
-      ArtistData: ArtistData,
+      totalChapters,
+      ChapterData: ChapterData,
     });
   } catch (error) {
-    console.error("Error in fetching Artist Data:", error);
+    console.error("Error in fetching Chapter Data:", error);
     return sendResponse(res, 500, true, "Internal Server Error");
   }
 };
 
 export {
-  registerArtist,
-  getAllArtist,
-  getArtistById,
-  updateArtistData,
-  deleteArtistImage,
-  uploadArtistImage,
-  deleteArtist,
-  getArtistDataBySearchKeyword,
-  getArtistDataBySearchKeywordPaginated,
-  getAllPaginatedArtistData,
+  createChapter,
+  getAllChapter,
+  getChapterById,
+  updateChapter,
+  deleteChapter,
+  getPaginatedChaptersData,
 };
