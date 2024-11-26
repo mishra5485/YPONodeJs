@@ -7,18 +7,16 @@ const ImagesSchema = new mongoose.Schema({
   },
 });
 
-const ArtistSchema = new mongoose.Schema({
+const ChapterSchema = new mongoose.Schema({
   _id: { type: String, required: true },
-  Images: [ImagesSchema],
-  Name: { type: String, index: true, required: true, unique: true },
-  Email: { type: String },
-  PhoneNo: { type: Number },
-  Description: { type: String },
+  chapter_Name: { type: String, index: true, required: true, unique: true },
+  chapter_Logo: { type: String, required: true },
+  chapter_Region: { type: String, default: "South Asia" },
   FilterationDateTime: { type: Date, required: true },
   createdAt: { type: String, required: true },
   status: { type: Number, required: true, default: 1 },
 });
 
-const Artist = mongoose.model("Artist", ArtistSchema);
+const Chapters = mongoose.model("Chapters", ChapterSchema);
 
-export default Artist;
+export default Chapters;

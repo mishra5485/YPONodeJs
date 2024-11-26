@@ -1,4 +1,4 @@
-import { Artist } from "../models/AllModels.js";
+import { Chapters } from "../models/AllModels.js";
 
 const fetchArtistDetailsFromDbService = async (artistIds) => {
   const FetchArtistDetails = await Promise.all(

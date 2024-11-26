@@ -3,14 +3,14 @@ import {
   validateImageDelete,
   validateArtistImageUpload,
   validateSearchQuery,
-} from "../../../validations/index.js";
-import getCurrentDateTime from "../../../helpers/getCurrentDateTime.js";
+} from "../validations/index.js";
+import getCurrentDateTime from "../helpers/getCurrentDateTime.js";
 import { v4 as uuidv4 } from "uuid";
-import sendResponse from "../../../helpers/sendResponse.js";
+import sendResponse from "../helpers/sendResponse.js";
 import path from "path";
 import fs from "fs/promises";
-import { ImagesPath } from "../../../helpers/Enum.js";
-import { configureMulter } from "../../../helpers/MulterConfig.js";
+import { ImagesPath } from "../helpers/Enum.js";
+import { configureMulter } from "../helpers/MulterConfig.js";
 import {
   createArtistService,
   findOneArtistDataService,
@@ -20,9 +20,9 @@ import {
   deleteArtistByIdService,
   getPaginatedArtistData,
   countArtists,
-} from "../../../services/ArtistServices.js";
-import { getAsiaCalcuttaCurrentDateTimeinIsoFormat } from "../../../helpers/DateTime.js";
-import { sanitizeFileName } from "../../../helpers/commonFunctions.js";
+} from "../services/ChapterServices.js";
+import { getAsiaCalcuttaCurrentDateTimeinIsoFormat } from "../helpers/DateTime.js";
+import { sanitizeFileName } from "../helpers/commonFunctions.js";
 
 const handleMulterError = (err, res) => {
   console.error("Multer Error:", err.message);

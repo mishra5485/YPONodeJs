@@ -11,46 +11,7 @@ import os from "os";
 import bodyParser from "body-parser";
 
 // Import routes
-import {
-  Artist,
-  Category,
-  Venue,
-  Genre,
-  SuperAdmin,
-  Organizer,
-  Promoter,
-  ScannerUser,
-  Events,
-  EventsTickets,
-  Smtp,
-  EventTour,
-  EventBulkTickets,
-  WebsiteCustomers,
-  HomePageBannerSlider,
-  EventTicketBooking,
-  Promocode,
-} from "./routes/AdminRoutes/index.js";
-
-import {
-  Customer,
-  WebisteArtist,
-  WebisteCategory,
-  WebisteVenue,
-  WebisteHomepage,
-  WebisteEvents,
-  WebisteGenre,
-  WebsiteEventTickets,
-  WebsitePromocodes,
-  WebsiteBooking,
-} from "./routes/CustomerRoutes/index.js";
-
-// Import controllers
-import { renderTicketbyBookingId } from "./controllers/AdminControllers/EventTickets/index.js";
-import {
-  updateEventStatusToCompleted,
-  expirePromocodeStatus,
-  releasePendingBookingTickets,
-} from "./CronJobs/index.js";
+import Chapter from "./routes/ChapterRoute.js";
 
 // Load environment variables
 dotenv.config();
@@ -100,40 +61,11 @@ if (cluster.isMaster) {
   app.set("view engine", "ejs");
   app.set("views", path.join(__dirname, "views"));
 
-  app.use("/artist", Artist);
-  app.use("/category", Category);
-  app.use("/venue", Venue);
-  app.use("/genre", Genre);
-  app.use("/superadmin", SuperAdmin);
-  app.use("/organizer", Organizer);
-  app.use("/promoter", Promoter);
-  app.use("/scanneruser", ScannerUser);
-  app.use("/events", Events);
-  app.use("/eventstickets", EventsTickets);
-  app.use("/smtp", Smtp);
-  app.use("/eventtour", EventTour);
-  app.use("/eventbulktickets", EventBulkTickets);
-  app.use("/websitecustomers", WebsiteCustomers);
-  app.use("/homepagebannerslider", HomePageBannerSlider);
-  app.use("/eventticketsbooking", EventTicketBooking);
-  app.use("/promocode", Promocode);
-
-  app.use("/webiste/customer", Customer);
-  app.use("/webiste/artist", WebisteArtist);
-  app.use("/webiste/category", WebisteCategory);
-  app.use("/webiste/venue", WebisteVenue);
-  app.use("/webiste/homepage", WebisteHomepage);
-  app.use("/webiste/events", WebisteEvents);
-  app.use("/webiste/genre", WebisteGenre);
-  app.use("/webiste/eventtickets", WebsiteEventTickets);
-  app.use("/webiste/promocodes", WebsitePromocodes);
-  app.use("/webiste/bookticket", WebsiteBooking);
+  app.use("/chapter", Chapter);
 
   app.use("/uploads", express.static("uploads"));
   app.use("/Assets", express.static("Assets"));
 
-  // Render ticket by booking ID
-  app.get("/rndtckt/:Booking_id", renderTicketbyBookingId);
 
   // 404 page
   app.use("*", (req, res) => {
@@ -146,8 +78,4 @@ if (cluster.isMaster) {
     console.log(`Worker ${process.pid} is listening on port ${port}`);
   });
 
-  // Cron jobs
-  cron.schedule("0 */1 * * *", updateEventStatusToCompleted); // Runs every 1 hours
-  cron.schedule("*/10 * * * *", expirePromocodeStatus); // Runs every 10 minutes
-  cron.schedule("* * * * *", releasePendingBookingTickets); // Runs every minute
 }

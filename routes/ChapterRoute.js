@@ -12,7 +12,7 @@ import {
   getArtistDataBySearchKeyword,
   getAllPaginatedArtistData,
   getArtistDataBySearchKeywordPaginated,
-} from "../../../controllers/AdminControllers/Artist/index.js";
+} from "../controllers/ChapterController.js";
 
 router.post("/register", registerArtist);
 
