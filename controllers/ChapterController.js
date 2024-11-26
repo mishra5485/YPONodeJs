@@ -85,7 +85,7 @@ const createChapter = async (req, res) => {
         chapter_Logo: chapterLogoImagePath,
         chapter_Region,
         createdAt: getCurrentDateTime(),
-        FilterationDateTime: getAsiaCalcuttaCurrentDateTimeinIsoFormat(),
+        filterationDateTime: getAsiaCalcuttaCurrentDateTimeinIsoFormat(),
       };
 
       // Save Chapter Data
