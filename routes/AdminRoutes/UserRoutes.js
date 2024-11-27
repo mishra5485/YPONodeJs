@@ -9,7 +9,7 @@ import {
   deleteUser,
   getPaginatedUsersData,
   renderUserCard,
-} from "../controllers/UserController.js";
+} from "../../controllers/AdminControllers/UserController.js";
 
 router.post("/create", createUser);
 

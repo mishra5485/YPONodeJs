@@ -1,8 +1,3 @@
-import getCurrentDateTime from "../helpers/getCurrentDateTime.js";
-import { v4 as uuidv4 } from "uuid";
-import sendResponse from "../helpers/sendResponse.js";
-import { generateQRCode } from "../helpers/commonFunctions.js";
-import { AccessLevel, Status, ServerBase_Url } from "../helpers/Enum.js";
 import {
   createUserService,
   getAllUsersDataService,
@@ -10,20 +5,25 @@ import {
   deleteUserByIdService,
   getPaginatedUserData,
   countUsers,
-} from "../services/UserServices.js";
-import { fetchChapterDetailsFromDbService } from "../services/ChapterServices.js";
+} from "../../services/UserServices.js";
+import { fetchChapterDetailsFromDbService } from "../../services/ChapterServices.js";
+
+import { v4 as uuidv4 } from "uuid";
 const saltRounds = 10;
 import bcrypt from "bcrypt";
-import generateAuthToken from "../helpers/auth.js";
-import { encrypt } from "../helpers/encryptionUtils.js";
+
 import puppeteer from "puppeteer";
 import ejs from "ejs";
 import path from "path";
 import { fileURLToPath } from "url";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-import { getAsiaCalcuttaCurrentDateTimeinIsoFormat } from "../helpers/DateTime.js";
+import generateAuthToken from "../../helpers/auth.js";
+import sendResponse from "../../helpers/sendResponse.js";
+import { encrypt } from "../../helpers/encryptionUtils.js";
+import { generateQRCode } from "../../helpers/commonFunctions.js";
+import getCurrentDateTime from "../../helpers/getCurrentDateTime.js";
+import { AccessLevel, Status, ServerBase_Url } from "../../helpers/Enum.js";
+import { getAsiaCalcuttaCurrentDateTimeinIsoFormat } from "../../helpers/DateTime.js";
 
 const createUser = async (req, res) => {
   try {

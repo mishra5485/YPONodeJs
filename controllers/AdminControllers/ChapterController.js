@@ -1,18 +1,20 @@
-import getCurrentDateTime from "../helpers/getCurrentDateTime.js";
-import { v4 as uuidv4 } from "uuid";
-import sendResponse from "../helpers/sendResponse.js";
-import * as fs from "fs";
-import { ImagesPath, Status } from "../helpers/Enum.js";
-import { configureMulter } from "../helpers/MulterConfig.js";
 import {
   createChapterService,
   getAllChapterDataService,
   findOneChapterDataService,
   getPaginatedChapterData,
   countChapters,
-} from "../services/ChapterServices.js";
-import { getAsiaCalcuttaCurrentDateTimeinIsoFormat } from "../helpers/DateTime.js";
-import { sanitizeFileName } from "../helpers/commonFunctions.js";
+} from "../../services/ChapterServices.js";
+
+import { v4 as uuidv4 } from "uuid";
+import * as fs from "fs";
+
+import sendResponse from "../../helpers/sendResponse.js";
+import { ImagesPath, Status } from "../../helpers/Enum.js";
+import { configureMulter } from "../../helpers/MulterConfig.js";
+import { sanitizeFileName } from "../../helpers/commonFunctions.js";
+import getCurrentDateTime from "../../helpers/getCurrentDateTime.js";
+import { getAsiaCalcuttaCurrentDateTimeinIsoFormat } from "../../helpers/DateTime.js";
 
 const handleMulterError = (err, res) => {
   console.error("Multer Error:", err.message);

@@ -8,7 +8,7 @@ import {
   updateChapter,
   deleteChapter,
   getPaginatedChaptersData,
-} from "../controllers/ChapterController.js";
+} from "../../controllers/AdminControllers/ChapterController.js";
 
 router.post("/create", createChapter);
 

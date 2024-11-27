@@ -10,9 +10,7 @@ import cluster from "cluster";
 import os from "os";
 import bodyParser from "body-parser";
 
-// Import routes
-import Chapter from "./routes/ChapterRoute.js";
-import Users from "./routes/UserRoutes.js";
+import { Chapter, Users } from "./routes/AdminRoutes/index.js";
 
 // Load environment variables
 dotenv.config();
