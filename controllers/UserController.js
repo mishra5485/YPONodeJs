@@ -1,20 +1,19 @@
 import getCurrentDateTime from "../helpers/getCurrentDateTime.js";
 import { v4 as uuidv4 } from "uuid";
 import sendResponse from "../helpers/sendResponse.js";
-import * as fs from "fs";
-import { AccessLevel } from "../helpers/Enum.js";
-import { configureMulter } from "../helpers/MulterConfig.js";
+import { AccessLevel, Status } from "../helpers/Enum.js";
 import {
   createUserService,
   getAllUsersDataService,
   findOneUserDataService,
-  updateUserDataService,
   deleteUserByIdService,
   getPaginatedUserData,
   countUsers,
 } from "../services/UserServices.js";
 const saltRounds = 10;
 import bcrypt from "bcrypt";
+import generateAuthToken from "../helpers/auth.js";
+import { encrypt } from "../helpers/encryptionUtils.js";
 import { getAsiaCalcuttaCurrentDateTimeinIsoFormat } from "../helpers/DateTime.js";
 
 const createUser = async (req, res) => {
@@ -83,6 +82,68 @@ const createUser = async (req, res) => {
     }
   } catch (error) {
     console.error("Create User Error:", error);
+    return sendResponse(res, 500, true, "Internal Server Error");
+  }
+};
+
+const userLogin = async (req, res) => {
+  try {
+    console.log("User Login API Called");
+    console.log("Req Body Parameters:-----> " + JSON.stringify(req.body));
+
+    const { member_id, password } = req.body;
+
+    if (!member_id) {
+      return sendResponse(res, 400, true, "MemberId is required");
+    }
+
+    if (!password) {
+      return sendResponse(res, 400, true, "Password is required");
+    }
+
+    const trimmedMemberId = member_id.trim();
+    const trimmedPassword = password.trim();
+
+    const memberIdRegex = new RegExp("^" + trimmedMemberId + "$", "i");
+
+    const filterQuery = {
+      member_id: memberIdRegex,
+      status: Status.Active,
+    };
+
+    const isMemberIdUserExists = await findOneUserDataService(filterQuery);
+
+    if (!isMemberIdUserExists) {
+      return sendResponse(res, 409, true, `Invalid MemberId or Password`);
+    }
+
+    const passwordMatch = await bcrypt.compare(
+      trimmedPassword,
+      isMemberIdUserExists.password
+    );
+
+    if (!passwordMatch) {
+      return sendResponse(res, 409, true, "Invalid MemberId or Password");
+    }
+
+    const payload = {
+      member_id: isMemberIdUserExists.member_id,
+      CurrentTimeStamp: getCurrentDateTime(),
+    };
+
+    const token = generateAuthToken({ payload });
+    const encryptedToken = encrypt(token);
+
+    const userData = {
+      token: encryptedToken,
+      Username: isMemberIdUserExists.userName,
+      user_id: isMemberIdUserExists._id,
+      Role: isMemberIdUserExists.accessLevel,
+    };
+
+    return sendResponse(res, 200, false, "Login successfully", userData);
+  } catch (error) {
+    console.error("User Login Error:", error);
     return sendResponse(res, 500, true, "Internal Server Error");
   }
 };
@@ -204,9 +265,9 @@ const getPaginatedUsersData = async (req, res) => {
 
 export {
   createUser,
+  userLogin,
   getAllUser,
   getUserById,
-  updateUser,
   deleteUser,
   getPaginatedUsersData,
 };

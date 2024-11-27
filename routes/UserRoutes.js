@@ -3,20 +3,20 @@ const router = express.Router();
 
 import {
   createUser,
+  userLogin,
   getAllUser,
   getUserById,
-  updateUser,
   deleteUser,
   getPaginatedUsersData,
 } from "../controllers/UserController.js";
 
 router.post("/create", createUser);
 
+router.post("/login", userLogin);
+
 router.get("/getall", getAllUser);
 
 router.post("/getbyId", getUserById);
-
-router.post("/updatebyId", updateUser);
 
 router.post("/deletebyId", deleteUser);
 
