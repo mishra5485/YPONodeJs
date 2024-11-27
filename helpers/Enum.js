@@ -16,4 +16,4 @@ const ImagesPath = {
   ChapterLogoFolderPath: "uploads/ChapterLogos/",
 };
 
-export { Status, AccessLevel, ImagesPath };
+export { Status, AccessLevel, ImagesPath, ServerBase_Url };

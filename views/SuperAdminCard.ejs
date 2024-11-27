@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Member Card</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f9;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+      }
+
+      .card {
+        background-color: #003366;
+        color: white;
+        width: 300px;
+        height: 450px;
+
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        text-align: center;
+      }
+
+      .card .logo {
+        width: 150px;
+        height: 150px;
+        margin: 0 auto 15px;
+      }
+
+      .card .name {
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 10px;
+      }
+
+      .card .member-id {
+        font-size: 22px;
+        margin-bottom: 15px;
+      }
+
+      .card .communication {
+        font-size: 20px;
+        margin-bottom: 15px;
+      }
+
+      .card .qr-code {
+        margin-top: 15px;
+      }
+
+      .qr-code img {
+        width: 160px;
+        height: 160px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <img class="logo" src="<%= logoUrl %>" alt="YPO Logo" />
+      <div class="name"><%= username %></div>
+      <div class="member-id">Member ID: <%= member_id %></div>
+      <div class="communication"><%= Alias %></div>
+      <div class="qr-code">
+        <img src="<%= qrCodeUrl %>" alt="QR Code" />
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,7 +1,8 @@
 import getCurrentDateTime from "../helpers/getCurrentDateTime.js";
 import { v4 as uuidv4 } from "uuid";
 import sendResponse from "../helpers/sendResponse.js";
-import { AccessLevel, Status } from "../helpers/Enum.js";
+import { generateQRCode } from "../helpers/commonFunctions.js";
+import { AccessLevel, Status, ServerBase_Url } from "../helpers/Enum.js";
 import {
   createUserService,
   getAllUsersDataService,
@@ -14,6 +15,13 @@ const saltRounds = 10;
 import bcrypt from "bcrypt";
 import generateAuthToken from "../helpers/auth.js";
 import { encrypt } from "../helpers/encryptionUtils.js";
+import puppeteer from "puppeteer";
+import ejs from "ejs";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 import { getAsiaCalcuttaCurrentDateTimeinIsoFormat } from "../helpers/DateTime.js";
 
 const createUser = async (req, res) => {
@@ -263,6 +271,40 @@ const getPaginatedUsersData = async (req, res) => {
   }
 };
 
+const renderUserCard = async (req, res) => {
+  try {
+    console.log("Render User User API Called");
+    console.log("Req Body Parameters:-----> " + JSON.stringify(req.params));
+
+    const user_id = req.params.user_id;
+
+    if (!user_id) {
+      return res.status(404).render("InvalidUserId");
+    }
+
+    const UserDetails = await findOneUserDataService({ _id: user_id });
+
+    if (!UserDetails) {
+      return res.status(404).render("UserCard");
+    }
+
+    const qrCodeUrl = await generateQRCode(
+      `${ServerBase_Url}/user/rndcard/${user_id}`
+    );
+
+    res.render("SuperAdminCard", {
+      logoUrl: `${ServerBase_Url}/Assets/YpoCardLogo.png`,
+      username: UserDetails._doc.userName,
+      member_id: UserDetails._doc.member_id,
+      Alias: UserDetails._doc.Alias,
+      qrCodeUrl: qrCodeUrl,
+    });
+  } catch (error) {
+    console.error("Error in fetching Rendering SuperAdmin Card:", error);
+    return sendResponse(res, 500, true, "Internal Server Error");
+  }
+};
+
 export {
   createUser,
   userLogin,
@@ -270,4 +312,5 @@ export {
   getUserById,
   deleteUser,
   getPaginatedUsersData,
+  renderUserCard,
 };

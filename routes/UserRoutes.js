@@ -8,6 +8,7 @@ import {
   getUserById,
   deleteUser,
   getPaginatedUsersData,
+  renderUserCard,
 } from "../controllers/UserController.js";
 
 router.post("/create", createUser);
@@ -21,5 +22,7 @@ router.post("/getbyId", getUserById);
 router.post("/deletebyId", deleteUser);
 
 router.post("/getallpaginatedData", getPaginatedUsersData);
+
+router.get("/rndcard/:user_id", renderUserCard);
 
 export default router;
