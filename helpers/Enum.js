@@ -6,10 +6,10 @@ const Status = {
 };
 
 const AccessLevel = {
-  SuperAdmin: 1,
-  Member: 2,
-  "Spouse/Partner": 3,
-  ChapterManager: 4,
+  SuperAdmin: "1",
+  Member: "2",
+  "Spouse/Partner": "3",
+  ChapterManager: "4",
 };
 
 const ImagesPath = {

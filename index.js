@@ -12,6 +12,7 @@ import bodyParser from "body-parser";
 
 // Import routes
 import Chapter from "./routes/ChapterRoute.js";
+import Users from "./routes/UserRoutes.js";
 
 // Load environment variables
 dotenv.config();
@@ -62,10 +63,10 @@ if (cluster.isMaster) {
   app.set("views", path.join(__dirname, "views"));
 
   app.use("/chapter", Chapter);
+  app.use("/user", Users);
 
   app.use("/uploads", express.static("uploads"));
   app.use("/Assets", express.static("Assets"));
-
 
   // 404 page
   app.use("*", (req, res) => {
@@ -77,5 +78,4 @@ if (cluster.isMaster) {
   app.listen(port, () => {
     console.log(`Worker ${process.pid} is listening on port ${port}`);
   });
-
 }

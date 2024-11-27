@@ -2,7 +2,7 @@ import { Users } from "../models/AllModels.js";
 
 const createUserService = async (UserData) => {
   try {
-    const newUser = new Chapters(UserData);
+    const newUser = new Users(UserData);
     await newUser.save();
     return newUser;
   } catch (error) {
