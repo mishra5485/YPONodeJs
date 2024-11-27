@@ -2,13 +2,12 @@ import getCurrentDateTime from "../helpers/getCurrentDateTime.js";
 import { v4 as uuidv4 } from "uuid";
 import sendResponse from "../helpers/sendResponse.js";
 import * as fs from "fs";
-import { ImagesPath } from "../helpers/Enum.js";
+import { ImagesPath, Status } from "../helpers/Enum.js";
 import { configureMulter } from "../helpers/MulterConfig.js";
 import {
   createChapterService,
   getAllChapterDataService,
   findOneChapterDataService,
-  deleteChapterByIdService,
   getPaginatedChapterData,
   countChapters,
 } from "../services/ChapterServices.js";
@@ -113,7 +112,9 @@ const getAllChapter = async (req, res) => {
   try {
     console.log("Get All Chapter Data API Called");
 
-    const allChaptersData = await getAllChapterDataService({});
+    const allChaptersData = await getAllChapterDataService({
+      status: Status.Active,
+    });
 
     if (!allChaptersData.length) {
       return sendResponse(res, 404, true, "Chapters not found");
@@ -141,7 +142,10 @@ const getChapterById = async (req, res) => {
       return sendResponse(res, 404, true, "Chapter Id not Provided");
     }
 
-    const ChapterDetails = await findOneChapterDataService({ _id: chapter_id });
+    const ChapterDetails = await findOneChapterDataService({
+      _id: chapter_id,
+      status: Status.Active,
+    });
 
     if (!ChapterDetails) {
       return sendResponse(res, 404, true, "Chapter Details not found");
@@ -169,7 +173,10 @@ const updateChapter = async (req, res) => {
     chapter_Name = chapter_Name ? chapter_Name.trim() : null;
     chapter_Region = chapter_Region ? chapter_Region.trim() : null;
 
-    const chapterExists = await findOneChapterDataService({ _id: chapter_id });
+    const chapterExists = await findOneChapterDataService({
+      _id: chapter_id,
+      status: Status.Active,
+    });
     if (!chapterExists) {
       return sendResponse(res, 404, true, "Chapter not found");
     }
@@ -215,38 +222,18 @@ const deleteChapter = async (req, res) => {
     console.log("Chapter ID: ----->", chapter_id);
 
     // Fetch Chapter Data
-    const chapterData = await findOneChapterDataService({ _id: chapter_id });
+    const chapterData = await findOneChapterDataService({
+      _id: chapter_id,
+      status: Status.Active,
+    });
 
     if (!chapterData) {
       return sendResponse(res, 404, true, "Chapter not found");
     }
 
-    const chapterLogoImagePath = chapterData.chapter_Logo;
+    chapterData.status = Status.Inactive;
 
-    // Remove Chapter Logo Image
-    try {
-      if (fs.existsSync(chapterLogoImagePath)) {
-        fs.unlinkSync(chapterLogoImagePath);
-      }
-    } catch (fileError) {
-      console.error("Error deleting Chapter Logo Image:", fileError);
-      return sendResponse(res, 500, true, "Error deleting Chapter Logo Image");
-    }
-
-    // Delete Chapter from Database
-    try {
-      const deleteQuery = { _id: chapter_id };
-      const result = await deleteChapterByIdService(deleteQuery);
-
-      if (result.deletedCount === 1) {
-        return sendResponse(res, 200, false, "Chapter deleted successfully");
-      } else {
-        return sendResponse(res, 409, true, "Failed to delete Chapter");
-      }
-    } catch (dbError) {
-      console.error("Error deleting Chapter from database:", dbError);
-      return sendResponse(res, 500, true, "Error deleting Chapter");
-    }
+    await chapterData.save();
   } catch (error) {
     console.error("Delete Chapter Error:", error);
     return sendResponse(res, 500, true, "Internal Server Error");
@@ -262,7 +249,13 @@ const getPaginatedChaptersData = async (req, res) => {
     const limit = parseInt(req.body.limit) || 10;
     const skip = (page - 1) * limit;
 
-    const ChapterData = await getPaginatedChapterData({}, limit, skip);
+    const ChapterData = await getPaginatedChapterData(
+      {
+        status: Status.Active,
+      },
+      limit,
+      skip
+    );
 
     if (!ChapterData.length) {
       return sendResponse(res, 404, true, "Chapter not found");
