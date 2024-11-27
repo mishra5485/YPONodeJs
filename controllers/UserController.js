@@ -11,6 +11,7 @@ import {
   getPaginatedUserData,
   countUsers,
 } from "../services/UserServices.js";
+import { fetchChapterDetailsFromDbService } from "../services/ChapterServices.js";
 const saltRounds = 10;
 import bcrypt from "bcrypt";
 import generateAuthToken from "../helpers/auth.js";
@@ -50,6 +51,38 @@ const createUser = async (req, res) => {
       return sendResponse(res, 400, true, "Username is required");
     }
 
+    if (Chapters) {
+      if (!Array.isArray(Chapters)) {
+        return sendResponse(
+          res,
+          400,
+          true,
+          "Chapters must be an array of objects"
+        );
+      }
+
+      const isValidChapters = Chapters.every(
+        (chapter) =>
+          typeof chapter == "object" &&
+          chapter != null &&
+          typeof chapter.chapter_id == "string"
+      );
+
+      if (!isValidChapters) {
+        return sendResponse(
+          res,
+          400,
+          true,
+          "Each Chapter must be an object with a 'chapter_id' string"
+        );
+      }
+
+      const notFoundChapters = await fetchChapterDetailsFromDbService(Chapters);
+      if (notFoundChapters.length > 0) {
+        return sendResponse(res, 404, true, `Selected Chapter(s) Not Found`);
+      }
+    }
+
     let userCreationAccesslevel = AccessLevel.SuperAdmin;
 
     if (created_userid) {
@@ -63,8 +96,6 @@ const createUser = async (req, res) => {
 
       userCreationAccesslevel = userCreationIDExists._doc.accessLevel;
     }
-
-    // const
 
     const trimmedMemberId = member_id.trim();
     const memberIdRegex = new RegExp(`^${trimmedMemberId}$`, "i");

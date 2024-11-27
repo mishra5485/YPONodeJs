@@ -21,6 +21,19 @@ const getAllChapterDataService = async (filterquery) => {
   }
 };
 
+const fetchChapterDetailsFromDbService = async (chapterIds) => {
+  const FetchChapterDetails = await Promise.all(
+    categoryIds.map(async (data) => {
+      const isChapterExists = await Chapters.findOne({
+        _id: data.chapter_id,
+      });
+      return !isChapterExists ? data : null;
+    })
+  );
+  const notFoundChapters = FetchChapterDetails.filter((data) => data !== null);
+  return notFoundChapters;
+};
+
 const findOneChapterDataService = async (filterquery) => {
   try {
     const ChapterData = await Chapters.findOne(filterquery);
@@ -78,6 +91,7 @@ const countChapters = async (filterQuery) => {
 export {
   createChapterService,
   getAllChapterDataService,
+  fetchChapterDetailsFromDbService,
   findOneChapterDataService,
   updateChapterDataService,
   deleteChapterByIdService,
