@@ -17,7 +17,8 @@ const UsersSchema = new mongoose.Schema({
   Alias: { type: String, default: "Test Alias" },
   filterationDateTime: { type: Date, required: true },
   createdAt: { type: String, required: true },
-  status: { type: Number, required: true, default: 1 },
+  status: { type: Number, required: true },
+  created_userid: { type: String },
   resetPasswordToken: { type: String, default: undefined },
   resetPasswordExpires: { type: String, default: undefined },
 });

@@ -35,6 +35,7 @@ const createUser = async (req, res) => {
       Chapters,
       userName,
       region = "South Asia",
+      created_userid,
     } = req.body;
 
     if (!member_id) {
@@ -48,6 +49,22 @@ const createUser = async (req, res) => {
     if (!userName) {
       return sendResponse(res, 400, true, "Username is required");
     }
+
+    let userCreationAccesslevel = AccessLevel.SuperAdmin;
+
+    if (created_userid) {
+      const userCreationIDExists = await findOneUserDataService({
+        _id: created_userid,
+      });
+
+      if (!userCreationIDExists) {
+        return sendResponse(res, 404, true, "User Details not found");
+      }
+
+      userCreationAccesslevel = userCreationIDExists._doc.accessLevel;
+    }
+
+    // const
 
     const trimmedMemberId = member_id.trim();
     const memberIdRegex = new RegExp(`^${trimmedMemberId}$`, "i");
@@ -73,6 +90,11 @@ const createUser = async (req, res) => {
       region,
       filterationDateTime: getAsiaCalcuttaCurrentDateTimeinIsoFormat(),
       createdAt: getCurrentDateTime(),
+      created_userid: created_userid,
+      status:
+        userCreationAccesslevel == AccessLevel.ChapterManager
+          ? Status.UnderApproval
+          : Status.Active,
     };
 
     try {

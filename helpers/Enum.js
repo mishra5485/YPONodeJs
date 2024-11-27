@@ -3,6 +3,7 @@ import { ServerBase_Url } from "../config/index.js";
 const Status = {
   Active: 1,
   Inactive: 2,
+  UnderApproval: 3,
 };
 
 const AccessLevel = {
