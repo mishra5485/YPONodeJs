@@ -3,7 +3,7 @@ import multer from "multer";
 const configureMulter = (fieldsConfig) => {
   const storage = multer.memoryStorage();
   const limits = {
-    fileSize: 1 * 1024 * 1024,
+    fileSize: 10 * 1024 * 1024,
   };
 
   const fileFilter = (req, file, cb) => {
