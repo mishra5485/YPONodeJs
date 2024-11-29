@@ -231,6 +231,102 @@ const getAllUser = async (req, res) => {
   }
 };
 
+const getAllSuperAdmins = async (req, res) => {
+  try {
+    console.log("Get All SuperAdmins Data API Called");
+
+    const superAdminsData = await getAllUsersDataService({
+      accessLevel: AccessLevel.SuperAdmin,
+    });
+
+    if (!superAdminsData.length) {
+      return sendResponse(res, 404, true, "SuperAdmins not found");
+    }
+    return sendResponse(
+      res,
+      200,
+      false,
+      "SuperAdmins fetched successfully",
+      superAdminsData
+    );
+  } catch (error) {
+    console.error("Error in fetching Users Data:", error);
+    return sendResponse(res, 500, true, "Internal Server Error");
+  }
+};
+
+const getAllMembers = async (req, res) => {
+  try {
+    console.log("Get All Members Data API Called");
+
+    const membersData = await getAllUsersDataService({
+      accessLevel: AccessLevel.Member,
+    });
+
+    if (!membersData.length) {
+      return sendResponse(res, 404, true, "Members not found");
+    }
+    return sendResponse(
+      res,
+      200,
+      false,
+      "Members fetched successfully",
+      membersData
+    );
+  } catch (error) {
+    console.error("Error in fetching Members Data:", error);
+    return sendResponse(res, 500, true, "Internal Server Error");
+  }
+};
+
+const getAllSpousePartners = async (req, res) => {
+  try {
+    console.log("Get All SpousePartners Data API Called");
+
+    const spousePartnersData = await getAllUsersDataService({
+      accessLevel: AccessLevel["Spouse/Partner"],
+    });
+
+    if (!spousePartnersData.length) {
+      return sendResponse(res, 404, true, "Spouse/Partners not found");
+    }
+    return sendResponse(
+      res,
+      200,
+      false,
+      "Spouse/Partners fetched successfully",
+      spousePartnersData
+    );
+  } catch (error) {
+    console.error("Error in fetching Spouse/Partners Data:", error);
+    return sendResponse(res, 500, true, "Internal Server Error");
+  }
+};
+
+const getAllChapterManagers = async (req, res) => {
+  try {
+    console.log("Get All ChapterManagers Data API Called");
+
+    const chapterManagersData = await getAllUsersDataService({
+      accessLevel: AccessLevel.ChapterManager,
+    });
+
+    if (!chapterManagersData.length) {
+      return sendResponse(res, 404, true, "Chapter Managers not found");
+    }
+    return sendResponse(
+      res,
+      200,
+      false,
+      "Chapter Managers fetched successfully",
+      chapterManagersData
+    );
+  } catch (error) {
+    console.error("Error in fetching Chapter Managers Data:", error);
+    return sendResponse(res, 500, true, "Internal Server Error");
+  }
+};
+
 const getUserById = async (req, res) => {
   try {
     console.log("Get User By Id Api Called");
@@ -362,6 +458,10 @@ export {
   createUser,
   userLogin,
   getAllUser,
+  getAllSuperAdmins,
+  getAllMembers,
+  getAllSpousePartners,
+  getAllChapterManagers,
   getUserById,
   deleteUser,
   getPaginatedUsersData,

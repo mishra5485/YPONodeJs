@@ -4,6 +4,7 @@ import {
   findOneChapterDataService,
   getPaginatedChapterData,
   countChapters,
+  deleteChapterByIdService,
 } from "../../services/ChapterServices.js";
 
 import { v4 as uuidv4 } from "uuid";
@@ -232,10 +233,32 @@ const deleteChapter = async (req, res) => {
     if (!chapterData) {
       return sendResponse(res, 404, true, "Chapter not found");
     }
+    const chapterLogoImagePath = chapterData.chapter_Logo;
 
-    chapterData.status = Status.Inactive;
+    // Remove Chapter Logo Image
+    try {
+      if (fs.existsSync(chapterLogoImagePath)) {
+        fs.unlinkSync(chapterLogoImagePath);
+      }
+    } catch (fileError) {
+      console.error("Error deleting Chapter Logo Image:", fileError);
+      return sendResponse(res, 500, true, "Error deleting Chapter Logo Image");
+    }
 
-    await chapterData.save();
+    // Delete Chapter from Database
+    try {
+      const deleteQuery = { _id: chapter_id };
+      const result = await deleteChapterByIdService(deleteQuery);
+
+      if (result.deletedCount == 1) {
+        return sendResponse(res, 200, false, "Chapter deleted successfully");
+      } else {
+        return sendResponse(res, 409, true, "Failed to delete Chapter");
+      }
+    } catch (dbError) {
+      console.error("Error deleting Chapter from database:", dbError);
+      return sendResponse(res, 500, true, "Error deleting Chapter");
+    }
   } catch (error) {
     console.error("Delete Chapter Error:", error);
     return sendResponse(res, 500, true, "Internal Server Error");

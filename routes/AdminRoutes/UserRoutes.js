@@ -5,6 +5,10 @@ import {
   createUser,
   userLogin,
   getAllUser,
+  getAllSuperAdmins,
+  getAllMembers,
+  getAllSpousePartners,
+  getAllChapterManagers,
   getUserById,
   deleteUser,
   getPaginatedUsersData,
@@ -16,6 +20,14 @@ router.post("/create", createUser);
 router.post("/login", userLogin);
 
 router.get("/getall", getAllUser);
+
+router.get("/getallSuperAdmins", getAllSuperAdmins);
+
+router.get("/getAllMembers", getAllMembers);
+
+router.get("/getAllSpousePartners", getAllSpousePartners);
+
+router.get("/getAllChapterManagers", getAllChapterManagers);
 
 router.post("/getbyId", getUserById);
 
