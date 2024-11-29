@@ -23,7 +23,7 @@ const getAllChapterDataService = async (filterquery) => {
 
 const fetchChapterDetailsFromDbService = async (chapterIds) => {
   const FetchChapterDetails = await Promise.all(
-    categoryIds.map(async (data) => {
+    chapterIds.map(async (data) => {
       const isChapterExists = await Chapters.findOne({
         _id: data.chapter_id,
       });
