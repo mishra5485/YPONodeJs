@@ -209,28 +209,6 @@ const userLogin = async (req, res) => {
   }
 };
 
-const getAllUser = async (req, res) => {
-  try {
-    console.log("Get All User Data API Called");
-
-    const allUsersData = await getAllUsersDataService({});
-
-    if (!allUsersData.length) {
-      return sendResponse(res, 404, true, "Users not found");
-    }
-    return sendResponse(
-      res,
-      200,
-      false,
-      "Users fetched successfully",
-      allUsersData
-    );
-  } catch (error) {
-    console.error("Error in fetching Users Data:", error);
-    return sendResponse(res, 500, true, "Internal Server Error");
-  }
-};
-
 const getAllSuperAdmins = async (req, res) => {
   try {
     console.log("Get All SuperAdmins Data API Called");
@@ -327,34 +305,6 @@ const getAllChapterManagers = async (req, res) => {
   }
 };
 
-const getUserById = async (req, res) => {
-  try {
-    console.log("Get User By Id Api Called");
-    console.log("User Id:-----> " + JSON.stringify(req.body.user_id));
-
-    const { user_id } = req.body;
-    if (!user_id) {
-      return sendResponse(res, 404, true, "User Id not Provided");
-    }
-
-    const UserDetails = await findOneUserDataService({ _id: user_id });
-
-    if (!UserDetails) {
-      return sendResponse(res, 404, true, "User Details not found");
-    }
-    return sendResponse(
-      res,
-      200,
-      false,
-      "User Details fetched successfully",
-      UserDetails
-    );
-  } catch (error) {
-    console.error("Get User By Id Error:", error.message);
-    return sendResponse(res, 500, true, "Internal Server Error");
-  }
-};
-
 const deleteUser = async (req, res) => {
   try {
     const { user_id } = req.body;
@@ -387,35 +337,6 @@ const deleteUser = async (req, res) => {
     }
   } catch (error) {
     console.error("Delete User Error:", error);
-    return sendResponse(res, 500, true, "Internal Server Error");
-  }
-};
-
-const getPaginatedUsersData = async (req, res) => {
-  try {
-    console.log("Get All User API Called");
-    console.log("Req Body Parameters:-----> " + JSON.stringify(req.body));
-
-    const page = parseInt(req.body.page) || 1;
-    const limit = parseInt(req.body.limit) || 10;
-    const skip = (page - 1) * limit;
-
-    const userData = await getPaginatedUserData({}, limit, skip);
-
-    if (!userData.length) {
-      return sendResponse(res, 404, true, "User not found");
-    }
-
-    const totalUsers = await countUsers({});
-
-    return sendResponse(res, 200, false, "Users fetched successfully", {
-      totalPages: Math.ceil(totalUsers / limit),
-      currentPage: page,
-      totalUsers: totalUsers,
-      usersData: userData,
-    });
-  } catch (error) {
-    console.error("Error in fetching User Data:", error);
     return sendResponse(res, 500, true, "Internal Server Error");
   }
 };
@@ -457,13 +378,10 @@ const renderUserCard = async (req, res) => {
 export {
   createUser,
   userLogin,
-  getAllUser,
   getAllSuperAdmins,
   getAllMembers,
   getAllSpousePartners,
   getAllChapterManagers,
-  getUserById,
   deleteUser,
-  getPaginatedUsersData,
   renderUserCard,
 };
