@@ -375,12 +375,16 @@ const getAllSpousePartners = async (req, res) => {
     if (!spousePartnersData.length) {
       return sendResponse(res, 404, true, "Spouse/Partners not found");
     }
+
+    const formattedUsersData = await getFormattedUserDataService(
+      spousePartnersData
+    );
     return sendResponse(
       res,
       200,
       false,
       "Spouse/Partners fetched successfully",
-      spousePartnersData
+      formattedUsersData
     );
   } catch (error) {
     console.error("Error in fetching Spouse/Partners Data:", error);
@@ -399,12 +403,16 @@ const getAllChapterManagers = async (req, res) => {
     if (!chapterManagersData.length) {
       return sendResponse(res, 404, true, "Chapter Managers not found");
     }
+
+    const formattedUsersData = await getFormattedUserDataService(
+      chapterManagersData
+    );
     return sendResponse(
       res,
       200,
       false,
       "Chapter Managers fetched successfully",
-      chapterManagersData
+      formattedUsersData
     );
   } catch (error) {
     console.error("Error in fetching Chapter Managers Data:", error);
