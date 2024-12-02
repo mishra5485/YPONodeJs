@@ -11,6 +11,7 @@ import { fetchChapterDetailsFromDbService } from "../../services/ChapterServices
 import { v4 as uuidv4 } from "uuid";
 const saltRounds = 10;
 import bcrypt from "bcrypt";
+import ExcelJS from "exceljs";
 
 import puppeteer from "puppeteer";
 import ejs from "ejs";
@@ -272,6 +273,66 @@ const getAllSuperAdmins = async (req, res) => {
   }
 };
 
+const downloadUserData = async (req, res) => {
+  try {
+    console.log("Download Users Data API Called");
+    console.log("Req Body Parameters:-----> ", req.body);
+
+    const usersData = await getAllUsersDataService({ status: Status.Active });
+
+    if (!usersData || usersData.length === 0) {
+      console.error(`No Users found.`);
+      return res.status(404).json({ message: "No Users found." });
+    }
+
+    const formattedUserData = usersData.map((data) => {
+      const accessLevelKey = Object.keys(AccessLevel).find(
+        (key) => AccessLevel[key] === data._doc.accessLevel
+      );
+
+      return {
+        MemberId: data._doc.member_id,
+        Username: data._doc.userName,
+        Type: accessLevelKey || data._doc.accessLevel,
+      };
+    });
+
+    // Create Excel Workbook and Worksheet
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("YPO SouthAsia Users Data");
+
+    worksheet.columns = [
+      { header: "MemberId", key: "MemberId" },
+      { header: "Username", key: "Username" },
+      { header: "Type", key: "Type" },
+    ];
+
+    // Add rows to the worksheet
+    worksheet.addRows(formattedUserData);
+
+    // Set headers and send file as response
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
+    res.setHeader(
+      "Content-Disposition",
+      "attachment; filename=YpoSouthAsiaUsers.xlsx"
+    );
+
+    // Write Excel file to response
+    await workbook.xlsx.write(res);
+    res.end(); // Explicit end of response
+  } catch (error) {
+    console.error("Error in fetching Users Data for download:", {
+      errorMessage: error.message,
+      stack: error.stack,
+      requestData: req.body,
+    });
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
 const getAllMembers = async (req, res) => {
   try {
     console.log("Get All Members Data API Called");
@@ -419,6 +480,7 @@ export {
   userLogin,
   updateUserName,
   getAllSuperAdmins,
+  downloadUserData,
   getAllMembers,
   getAllSpousePartners,
   getAllChapterManagers,

@@ -6,6 +6,7 @@ import {
   userLogin,
   updateUserName,
   getAllSuperAdmins,
+  downloadUserData,
   getAllMembers,
   getAllSpousePartners,
   getAllChapterManagers,
@@ -20,6 +21,8 @@ router.post("/login", userLogin);
 router.post("/upadtebyId", updateUserName);
 
 router.get("/getallSuperAdmins", getAllSuperAdmins);
+
+router.post("/downloadUserData", downloadUserData);
 
 router.get("/getAllMembers", getAllMembers);
 
