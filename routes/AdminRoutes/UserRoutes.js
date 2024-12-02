@@ -12,6 +12,7 @@ import {
   getAllChapterManagers,
   deleteUser,
   renderUserCard,
+  downloadUserCard,
 } from "../../controllers/AdminControllers/UserController.js";
 
 router.post("/create", createUser);
@@ -33,5 +34,7 @@ router.get("/getAllChapterManagers", getAllChapterManagers);
 router.post("/deletebyId", deleteUser);
 
 router.get("/rndcard/:user_id", renderUserCard);
+
+router.get("/downloadcard/:user_id", downloadUserCard);
 
 export default router;

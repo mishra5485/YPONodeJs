@@ -17,6 +17,7 @@ import puppeteer from "puppeteer";
 import ejs from "ejs";
 import path from "path";
 import { fileURLToPath } from "url";
+import fs from "fs/promises";
 
 import generateAuthToken from "../../helpers/auth.js";
 import sendResponse from "../../helpers/sendResponse.js";
@@ -25,6 +26,15 @@ import { generateQRCode } from "../../helpers/commonFunctions.js";
 import getCurrentDateTime from "../../helpers/getCurrentDateTime.js";
 import { AccessLevel, Status, ServerBase_Url } from "../../helpers/Enum.js";
 import { getAsiaCalcuttaCurrentDateTimeinIsoFormat } from "../../helpers/DateTime.js";
+
+const renderTemplate = (res, templateName, data) => {
+  return new Promise((resolve, reject) => {
+    res.render(templateName, data, (err, html) => {
+      if (err) return reject(err);
+      resolve(html);
+    });
+  });
+};
 
 const createUser = async (req, res) => {
   try {
@@ -441,37 +451,109 @@ const deleteUser = async (req, res) => {
   }
 };
 
+const getUserCardData = async (user_id) => {
+  if (!user_id) {
+    throw new Error("Invalid User ID");
+  }
+
+  // Fetch user details
+  const UserDetails = await findOneUserDataService({ _id: user_id });
+  if (!UserDetails) {
+    throw new Error("User not found");
+  }
+
+  // Generate QR Code URL
+  const qrCodeUrl = await generateQRCode(
+    `${ServerBase_Url}/user/rndcard/${user_id}`
+  );
+
+  // Prepare rendering data
+  const renderingData = {
+    logoUrl: `${ServerBase_Url}/Assets/YpoCardLogo.png`,
+    username: UserDetails._doc.userName,
+    member_id: UserDetails._doc.member_id,
+    Alias: UserDetails._doc.Alias,
+    qrCodeUrl: qrCodeUrl,
+  };
+
+  return renderingData;
+};
+
 const renderUserCard = async (req, res) => {
   try {
-    console.log("Render User User API Called");
+    console.log("Render User Card API Called");
     console.log("Req Body Parameters:-----> " + JSON.stringify(req.params));
 
     const user_id = req.params.user_id;
 
-    if (!user_id) {
+    const renderingData = await getUserCardData(user_id);
+
+    // Render the SuperAdminCard view
+    res.render("SuperAdminCard", renderingData);
+  } catch (error) {
+    console.error("Error in rendering SuperAdmin Card:", error.message);
+
+    if (error.message === "Invalid User ID") {
       return res.status(404).render("InvalidUserId");
-    }
-
-    const UserDetails = await findOneUserDataService({ _id: user_id });
-
-    if (!UserDetails) {
+    } else if (error.message === "User not found") {
       return res.status(404).render("UserCard");
+    } else {
+      return sendResponse(res, 500, true, "Internal Server Error");
     }
+  }
+};
 
-    const qrCodeUrl = await generateQRCode(
-      `${ServerBase_Url}/user/rndcard/${user_id}`
+const downloadUserCard = async (req, res) => {
+  try {
+    console.log("Download User Card API Called");
+    console.log("Req Body Parameters:-----> " + JSON.stringify(req.params));
+
+    const user_id = req.params.user_id;
+
+    const renderingData = await getUserCardData(user_id);
+
+    // Generate HTML content using the helper function
+    const htmlContent = await renderTemplate(
+      res,
+      "SuperAdminCard",
+      renderingData
     );
 
-    res.render("SuperAdminCard", {
-      logoUrl: `${ServerBase_Url}/Assets/YpoCardLogo.png`,
-      username: UserDetails._doc.userName,
-      member_id: UserDetails._doc.member_id,
-      Alias: UserDetails._doc.Alias,
-      qrCodeUrl: qrCodeUrl,
+    // Generate the image using Puppeteer
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+
+    await page.setContent(htmlContent, { waitUntil: "load" });
+
+    // Capture screenshot as JPG
+    const imageBuffer = await page.screenshot({
+      type: "jpeg",
+      quality: 80,
+      fullPage: true,
     });
+    await browser.close();
+
+    // Send the image as a response
+    if (!res.headersSent) {
+      res.setHeader("Content-Type", "image/jpeg");
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="UserCard_${user_id}.jpg"`
+      );
+      res.send(imageBuffer);
+    }
   } catch (error) {
-    console.error("Error in fetching Rendering SuperAdmin Card:", error);
-    return sendResponse(res, 500, true, "Internal Server Error");
+    console.error("Error in downloading User Card:", error.message);
+
+    if (!res.headersSent) {
+      if (error.message === "Invalid User ID") {
+        return res.status(400).send("Invalid User ID");
+      } else if (error.message === "User not found") {
+        return res.status(404).send("User not found");
+      } else {
+        return res.status(500).send("Internal Server Error");
+      }
+    }
   }
 };
 
@@ -486,4 +568,5 @@ export {
   getAllChapterManagers,
   deleteUser,
   renderUserCard,
+  downloadUserCard,
 };
