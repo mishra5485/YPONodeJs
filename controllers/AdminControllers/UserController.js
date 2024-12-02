@@ -287,7 +287,7 @@ const downloadUserData = async (req, res) => {
 
     const formattedUserData = usersData.map((data) => {
       const accessLevelKey = Object.keys(AccessLevel).find(
-        (key) => AccessLevel[key] === data._doc.accessLevel
+        (key) => AccessLevel[key] == data._doc.accessLevel
       );
 
       return {
