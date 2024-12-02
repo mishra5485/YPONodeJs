@@ -3,6 +3,7 @@ import {
   getAllUsersDataService,
   findOneUserDataService,
   deleteUserByIdService,
+  getFormattedUserDataService,
 } from "../../services/UserServices.js";
 import { fetchChapterDetailsFromDbService } from "../../services/ChapterServices.js";
 
@@ -348,12 +349,14 @@ const getAllMembers = async (req, res) => {
     if (!membersData.length) {
       return sendResponse(res, 404, true, "Members not found");
     }
+
+    const formattedUsersData = await getFormattedUserDataService(membersData);
     return sendResponse(
       res,
       200,
       false,
       "Members fetched successfully",
-      membersData
+      formattedUsersData
     );
   } catch (error) {
     console.error("Error in fetching Members Data:", error);

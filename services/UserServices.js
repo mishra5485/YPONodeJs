@@ -1,4 +1,5 @@
 import { Users } from "../models/AllModels.js";
+import { findOneChapterDataService } from "./ChapterServices.js";
 
 const createUserService = async (UserData) => {
   try {
@@ -72,6 +73,39 @@ const countUsers = async (filterQuery) => {
   }
 };
 
+const getFormattedUserDataService = async (UsersData) => {
+  const updatedUsersDataArray = await Promise.all(
+    UsersData.map(async (data) => {
+      const ChaptersArray = data._doc.Chapters;
+
+      const updatedChapterArrayWithNames = await Promise.all(
+        ChaptersArray.map(async (chapterData) => {
+          const { chapter_id } = chapterData;
+          const chapterFilterQuery = {
+            _id: chapter_id,
+          };
+          const ChapterData = await findOneChapterDataService(
+            chapterFilterQuery
+          );
+          const ChapterName = ChapterData._doc.chapter_Name;
+          return {
+            chapter_id,
+            ChapterName: ChapterName,
+          };
+        })
+      );
+
+      const updatedUserObj = {
+        updatedChapterArrayWithNames: updatedChapterArrayWithNames,
+        ...data._doc,
+      };
+
+      return updatedUserObj;
+    })
+  );
+  return updatedUsersDataArray;
+};
+
 export {
   createUserService,
   getAllUsersDataService,
@@ -80,4 +114,5 @@ export {
   deleteUserByIdService,
   getPaginatedUserData,
   countUsers,
+  getFormattedUserDataService,
 };
