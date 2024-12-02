@@ -10,6 +10,7 @@ import {
   getAllMembers,
   getAllSpousePartners,
   getAllChapterManagers,
+  getAllChapterUsers,
   deleteUser,
   renderUserCard,
   downloadUserCard,
@@ -30,6 +31,8 @@ router.get("/getAllMembers", getAllMembers);
 router.get("/getAllSpousePartners", getAllSpousePartners);
 
 router.get("/getAllChapterManagers", getAllChapterManagers);
+
+router.post("/getAllChapterUsers", getAllChapterUsers);
 
 router.post("/deletebyId", deleteUser);
 

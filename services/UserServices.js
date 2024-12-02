@@ -1,5 +1,6 @@
 import { Users } from "../models/AllModels.js";
 import { findOneChapterDataService } from "./ChapterServices.js";
+import { AccessLevel } from "../helpers/Enum.js";
 
 const createUserService = async (UserData) => {
   try {
@@ -106,6 +107,58 @@ const getFormattedUserDataService = async (UsersData) => {
   return updatedUsersDataArray;
 };
 
+const formatUserDataforChapter = async (UsersData) => {
+  const userRoleOrder = { 4: 1, 2: 2, 3: 3 };
+
+  const sortedUsersData = UsersData.sort((a, b) => {
+    const userRoleA = a._doc.accessLevel;
+    const userRoleB = b._doc.accessLevel;
+
+    return (
+      (userRoleOrder[userRoleA] || Infinity) -
+      (userRoleOrder[userRoleB] || Infinity)
+    );
+  });
+
+  const updatedUsersDataArray = await Promise.all(
+    sortedUsersData.map(async (data) => {
+      const ChaptersArray = data._doc.Chapters;
+      const UserRole = data._doc.accessLevel;
+
+      const accessLevelKey = Object.keys(AccessLevel).find(
+        (key) => AccessLevel[key] == UserRole
+      );
+
+      const updatedChapterArrayWithNames = await Promise.all(
+        ChaptersArray.map(async (chapterData) => {
+          const { chapter_id } = chapterData;
+          const chapterFilterQuery = {
+            _id: chapter_id,
+          };
+          const ChapterData = await findOneChapterDataService(
+            chapterFilterQuery
+          );
+          const ChapterName = ChapterData._doc.chapter_Name;
+          return {
+            chapter_id,
+            ChapterName: ChapterName,
+          };
+        })
+      );
+
+      const updatedUserObj = {
+        updatedChapterArrayWithNames: updatedChapterArrayWithNames,
+        ...data._doc,
+        RoleName: accessLevelKey || UserRole,
+      };
+
+      return updatedUserObj;
+    })
+  );
+
+  return updatedUsersDataArray;
+};
+
 export {
   createUserService,
   getAllUsersDataService,
@@ -115,4 +168,5 @@ export {
   getPaginatedUserData,
   countUsers,
   getFormattedUserDataService,
+  formatUserDataforChapter,
 };

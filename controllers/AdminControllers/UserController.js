@@ -4,8 +4,12 @@ import {
   findOneUserDataService,
   deleteUserByIdService,
   getFormattedUserDataService,
+  formatUserDataforChapter,
 } from "../../services/UserServices.js";
-import { fetchChapterDetailsFromDbService } from "../../services/ChapterServices.js";
+import {
+  fetchChapterDetailsFromDbService,
+  findOneChapterDataService,
+} from "../../services/ChapterServices.js";
 
 import { v4 as uuidv4 } from "uuid";
 const saltRounds = 10;
@@ -420,6 +424,47 @@ const getAllChapterManagers = async (req, res) => {
   }
 };
 
+const getAllChapterUsers = async (req, res) => {
+  try {
+    console.log("Get All ChapterUsers Data API Called");
+    console.log("Req Body Parameters:-----> " + JSON.stringify(req.body));
+
+    let { chapter_id } = req.body;
+
+    const isChapterExists = await findOneChapterDataService({
+      _id: chapter_id,
+    });
+
+    if (!isChapterExists) {
+      return sendResponse(res, 404, true, "Chapter not found");
+    }
+
+    const userFilterQuery = {
+      "Chapters.chapter_id": chapter_id,
+      status: Status.Active,
+    };
+
+    const chapterUsersData = await getAllUsersDataService(userFilterQuery);
+
+    if (chapterUsersData.length == 0) {
+      return sendResponse(res, 404, true, "Chapter Users not found");
+    }
+
+    const formattedUsersData = await formatUserDataforChapter(chapterUsersData);
+
+    return sendResponse(
+      res,
+      200,
+      false,
+      "Chapter Users fetched successfully",
+      formattedUsersData
+    );
+  } catch (error) {
+    console.error("Error in fetching Chapter Users Data:", error);
+    return sendResponse(res, 500, true, "Internal Server Error");
+  }
+};
+
 const deleteUser = async (req, res) => {
   try {
     const { user_id } = req.body;
@@ -571,6 +616,7 @@ export {
   getAllMembers,
   getAllSpousePartners,
   getAllChapterManagers,
+  getAllChapterUsers,
   deleteUser,
   renderUserCard,
   downloadUserCard,
