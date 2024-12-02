@@ -9,6 +9,7 @@ import {
 import {
   fetchChapterDetailsFromDbService,
   findOneChapterDataService,
+  getAllChapterDataService,
 } from "../../services/ChapterServices.js";
 
 import { v4 as uuidv4 } from "uuid";
@@ -215,6 +216,51 @@ const userLogin = async (req, res) => {
     return sendResponse(res, 200, false, "Login successfully", userData);
   } catch (error) {
     console.error("User Login Error:", error);
+    return sendResponse(res, 500, true, "Internal Server Error");
+  }
+};
+
+const getSuperAdminDashBoardData = async (req, res) => {
+  try {
+    console.log("Get All SuperAdmins Dashboard Data API Called");
+
+    const superAdminsData = await getAllUsersDataService({
+      accessLevel: AccessLevel.SuperAdmin,
+    });
+
+    const membersData = await getAllUsersDataService({
+      accessLevel: AccessLevel.Member,
+    });
+
+    const spousePartnersData = await getAllUsersDataService({
+      accessLevel: AccessLevel["Spouse/Partner"],
+    });
+
+    const allChaptersData = await getAllChapterDataService({
+      status: Status.Active,
+    });
+
+    const chapterManagersData = await getAllUsersDataService({
+      accessLevel: AccessLevel.ChapterManager,
+    });
+
+    const respObj = {
+      superAdminsDatalength: superAdminsData.length,
+      membersDatalength: membersData.length,
+      spousePartnersDatalength: spousePartnersData.length,
+      allChaptersDatalength: allChaptersData.length,
+      chapterManagersDatalength: chapterManagersData.length,
+    };
+
+    return sendResponse(
+      res,
+      200,
+      false,
+      "SuperAdmins Dashboard Data fetched successfully",
+      respObj
+    );
+  } catch (error) {
+    console.error("Error in fetching Users Data:", error);
     return sendResponse(res, 500, true, "Internal Server Error");
   }
 };
@@ -610,6 +656,7 @@ const downloadUserCard = async (req, res) => {
 export {
   createUser,
   userLogin,
+  getSuperAdminDashBoardData,
   updateUserName,
   getAllSuperAdmins,
   downloadUserData,

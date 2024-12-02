@@ -4,6 +4,7 @@ const router = express.Router();
 import {
   createUser,
   userLogin,
+  getSuperAdminDashBoardData,
   updateUserName,
   getAllSuperAdmins,
   downloadUserData,
@@ -19,6 +20,8 @@ import {
 router.post("/create", createUser);
 
 router.post("/login", userLogin);
+
+router.post("/getSuperAdminDashBoardData", getSuperAdminDashBoardData);
 
 router.post("/upadtebyId", updateUserName);
 
