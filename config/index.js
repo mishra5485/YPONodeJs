@@ -12,7 +12,7 @@ const isProduction = process.env.IS_PRODUCTION;
 if (isProduction == "true") {
   ServerBase_Url = "http://node.eventingclub.in";
 } else {
-  ServerBase_Url = "http://localhost:2000";
+  ServerBase_Url = `http://localhost:${config.backendPort}`;
 }
 
 export { config, ServerBase_Url, AdminPanelBase_Url, isProduction };

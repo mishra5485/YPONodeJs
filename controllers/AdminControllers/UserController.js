@@ -490,9 +490,9 @@ const renderUserCard = async (req, res) => {
   } catch (error) {
     console.error("Error in rendering SuperAdmin Card:", error.message);
 
-    if (error.message === "Invalid User ID") {
+    if (error.message == "Invalid User ID") {
       return res.status(404).render("InvalidUserId");
-    } else if (error.message === "User not found") {
+    } else if (error.message == "User not found") {
       return res.status(404).render("UserCard");
     } else {
       return sendResponse(res, 500, true, "Internal Server Error");
