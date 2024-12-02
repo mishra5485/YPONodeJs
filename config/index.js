@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const config = {
-  backendPort: 2000,
+  backendPort: 3000,
 };
 
 let ServerBase_Url;

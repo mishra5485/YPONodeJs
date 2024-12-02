@@ -3,8 +3,6 @@ import {
   getAllUsersDataService,
   findOneUserDataService,
   deleteUserByIdService,
-  getPaginatedUserData,
-  countUsers,
 } from "../../services/UserServices.js";
 import { fetchChapterDetailsFromDbService } from "../../services/ChapterServices.js";
 
@@ -14,10 +12,6 @@ import bcrypt from "bcrypt";
 import ExcelJS from "exceljs";
 
 import puppeteer from "puppeteer";
-import ejs from "ejs";
-import path from "path";
-import { fileURLToPath } from "url";
-import fs from "fs/promises";
 
 import generateAuthToken from "../../helpers/auth.js";
 import sendResponse from "../../helpers/sendResponse.js";
