@@ -4,6 +4,7 @@ const router = express.Router();
 import {
   createUser,
   userLogin,
+  updateUserName,
   getAllSuperAdmins,
   getAllMembers,
   getAllSpousePartners,
@@ -15,6 +16,8 @@ import {
 router.post("/create", createUser);
 
 router.post("/login", userLogin);
+
+router.post("/upadtebyId", updateUserName);
 
 router.get("/getallSuperAdmins", getAllSuperAdmins);
 

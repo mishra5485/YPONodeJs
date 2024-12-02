@@ -209,6 +209,45 @@ const userLogin = async (req, res) => {
   }
 };
 
+const updateUserName = async (req, res) => {
+  try {
+    console.log("Update User Details By Id Api Called");
+    console.log("Req Body Parameters:-----> " + JSON.stringify(req.body));
+
+    let { userName, user_id } = req.body;
+
+    if (!user_id) {
+      return sendResponse(res, 400, true, " UserId is required");
+    }
+
+    userName = userName ? userName.trim() : null;
+
+    const userExists = await findOneUserDataService({
+      _id: user_id,
+      status: Status.Active,
+    });
+    if (!userExists) {
+      return sendResponse(res, 404, true, "User not found");
+    }
+
+    if (userName) {
+      userExists.userName = userName;
+    }
+
+    await userExists.save();
+    return sendResponse(
+      res,
+      200,
+      false,
+      "User updated successfully",
+      userExists
+    );
+  } catch (error) {
+    console.error("Update User Error:", error.message);
+    return sendResponse(res, 500, true, "Internal Server Error");
+  }
+};
+
 const getAllSuperAdmins = async (req, res) => {
   try {
     console.log("Get All SuperAdmins Data API Called");
@@ -378,6 +417,7 @@ const renderUserCard = async (req, res) => {
 export {
   createUser,
   userLogin,
+  updateUserName,
   getAllSuperAdmins,
   getAllMembers,
   getAllSpousePartners,
