@@ -6,6 +6,7 @@ import {
   userLogin,
   getSuperAdminDashBoardData,
   updateUserName,
+  userChangePassword,
   getAllSuperAdmins,
   downloadUserData,
   getAllMembers,
@@ -24,6 +25,8 @@ router.post("/login", userLogin);
 router.post("/getSuperAdminDashBoardData", getSuperAdminDashBoardData);
 
 router.post("/upadtebyId", updateUserName);
+
+router.post("/userChangePassword", userChangePassword);
 
 router.get("/getallSuperAdmins", getAllSuperAdmins);
 

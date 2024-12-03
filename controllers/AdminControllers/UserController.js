@@ -304,6 +304,53 @@ const updateUserName = async (req, res) => {
   }
 };
 
+const userChangePassword = async (req, res) => {
+  try {
+    console.log("User Change Password API Called");
+    console.log("Req Body Parameters:-----> " + JSON.stringify(req.body));
+
+    let { CurrentPassword, NewPassword, user_id } = req.body;
+
+    const trimmedCurrentPassword = CurrentPassword.trim();
+    const trimmedNewPassword = NewPassword.trim();
+
+    const filterQuery = {
+      _id: user_id,
+      status: Status.Active,
+    };
+
+    let userData = await findOneUserDataService(filterQuery);
+
+    if (!userData) {
+      return sendResponse(res, 409, true, `User not found`);
+    }
+
+    const passwordMatch = await bcrypt.compare(
+      trimmedCurrentPassword,
+      userData.password
+    );
+
+    if (!passwordMatch) {
+      return sendResponse(res, 409, true, "Invalid Current Password");
+    }
+
+    bcrypt.hash(trimmedNewPassword, saltRounds, async function (err, hash) {
+      if (err) {
+        console.error(err);
+        return sendResponse(res, 500, true, "Error hashing NewPassword");
+      }
+
+      userData.password = hash;
+      userData.save();
+
+      return sendResponse(res, 200, false, "Password Changed Successfully");
+    });
+  } catch (error) {
+    console.error("User Change Password Error:", error);
+    return sendResponse(res, 500, true, "Internal Server Error");
+  }
+};
+
 const getAllSuperAdmins = async (req, res) => {
   try {
     console.log("Get All SuperAdmins Data API Called");
@@ -658,6 +705,7 @@ export {
   userLogin,
   getSuperAdminDashBoardData,
   updateUserName,
+  userChangePassword,
   getAllSuperAdmins,
   downloadUserData,
   getAllMembers,
