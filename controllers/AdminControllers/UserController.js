@@ -226,14 +226,17 @@ const getSuperAdminDashBoardData = async (req, res) => {
 
     const superAdminsData = await getAllUsersDataService({
       accessLevel: AccessLevel.SuperAdmin,
+      status: Status.Active,
     });
 
     const membersData = await getAllUsersDataService({
       accessLevel: AccessLevel.Member,
+      status: Status.Active,
     });
 
     const spousePartnersData = await getAllUsersDataService({
       accessLevel: AccessLevel["Spouse/Partner"],
+      status: Status.Active,
     });
 
     const allChaptersData = await getAllChapterDataService({
@@ -242,6 +245,7 @@ const getSuperAdminDashBoardData = async (req, res) => {
 
     const chapterManagersData = await getAllUsersDataService({
       accessLevel: AccessLevel.ChapterManager,
+      status: Status.Active,
     });
 
     const respObj = {
@@ -388,6 +392,7 @@ const getAllSuperAdmins = async (req, res) => {
 
     const superAdminsData = await getAllUsersDataService({
       accessLevel: AccessLevel.SuperAdmin,
+      status: Status.Active,
     });
 
     if (!superAdminsData.length) {
@@ -472,6 +477,7 @@ const getAllMembers = async (req, res) => {
 
     const membersData = await getAllUsersDataService({
       accessLevel: AccessLevel.Member,
+      status: Status.Active,
     });
 
     if (!membersData.length) {
@@ -498,6 +504,7 @@ const getAllSpousePartners = async (req, res) => {
 
     const spousePartnersData = await getAllUsersDataService({
       accessLevel: AccessLevel["Spouse/Partner"],
+      status: Status.Active,
     });
 
     if (!spousePartnersData.length) {
@@ -526,6 +533,7 @@ const getAllChapterManagers = async (req, res) => {
 
     const chapterManagersData = await getAllUsersDataService({
       accessLevel: AccessLevel.ChapterManager,
+      status: Status.Active,
     });
 
     if (!chapterManagersData.length) {
@@ -631,7 +639,10 @@ const getUserCardData = async (user_id) => {
   }
 
   // Fetch user details
-  const UserDetails = await findOneUserDataService({ _id: user_id });
+  const UserDetails = await findOneUserDataService({
+    _id: user_id,
+    status: Status.Active,
+  });
   if (!UserDetails) {
     throw new Error("User not found");
   }
