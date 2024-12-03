@@ -5,6 +5,7 @@ import {
   createUser,
   userLogin,
   getSuperAdminDashBoardData,
+  getChapterManagerDashBoardData,
   updateUserName,
   getUserbyId,
   userChangePassword,
@@ -24,6 +25,8 @@ router.post("/create", createUser);
 router.post("/login", userLogin);
 
 router.post("/getSuperAdminDashBoardData", getSuperAdminDashBoardData);
+
+router.post("/getChapterManagerDashBoardData", getChapterManagerDashBoardData);
 
 router.post("/upadtebyId", updateUserName);
 
