@@ -4,6 +4,7 @@ const Status = {
   Active: 1,
   Inactive: 2,
   UnderApproval: 3,
+  Rejected: 4,
 };
 
 const AccessLevel = {
