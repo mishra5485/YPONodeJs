@@ -304,6 +304,37 @@ const updateUserName = async (req, res) => {
   }
 };
 
+const getUserbyId = async (req, res) => {
+  try {
+    console.log("Get UserDetails By Id Api Called");
+    console.log("User Id:-----> " + JSON.stringify(req.body.chapter_id));
+
+    const { userId } = req.body;
+    if (!userId) {
+      return sendResponse(res, 404, true, "User Id not Provided");
+    }
+
+    const UserDetails = await findOneUserDataService({
+      _id: userId,
+      status: Status.Active,
+    });
+
+    if (!UserDetails) {
+      return sendResponse(res, 404, true, "User Details not found");
+    }
+    return sendResponse(
+      res,
+      200,
+      false,
+      "User Details fetched successfully",
+      UserDetails
+    );
+  } catch (error) {
+    console.error("Get User By Id Error:", error.message);
+    return sendResponse(res, 500, true, "Internal Server Error");
+  }
+};
+
 const userChangePassword = async (req, res) => {
   try {
     console.log("User Change Password API Called");
@@ -705,6 +736,7 @@ export {
   userLogin,
   getSuperAdminDashBoardData,
   updateUserName,
+  getUserbyId,
   userChangePassword,
   getAllSuperAdmins,
   downloadUserData,
