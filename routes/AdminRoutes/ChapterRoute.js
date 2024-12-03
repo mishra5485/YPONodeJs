@@ -4,6 +4,7 @@ const router = express.Router();
 import {
   createChapter,
   getAllChapter,
+  getChapterManagerChapters,
   getChapterById,
   updateChapter,
   deleteChapter,
@@ -13,6 +14,8 @@ import {
 router.post("/create", createChapter);
 
 router.get("/getall", getAllChapter);
+
+router.post("/getManagerChapters", getChapterManagerChapters);
 
 router.post("/getbyId", getChapterById);
 

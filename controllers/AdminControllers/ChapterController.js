@@ -6,12 +6,13 @@ import {
   countChapters,
   deleteChapterByIdService,
 } from "../../services/ChapterServices.js";
+import { findOneUserDataService } from "../../services/UserServices.js";
 
 import { v4 as uuidv4 } from "uuid";
 import * as fs from "fs";
 
 import sendResponse from "../../helpers/sendResponse.js";
-import { ImagesPath, Status } from "../../helpers/Enum.js";
+import { AccessLevel, ImagesPath, Status } from "../../helpers/Enum.js";
 import { configureMulter } from "../../helpers/MulterConfig.js";
 import { sanitizeFileName } from "../../helpers/commonFunctions.js";
 import getCurrentDateTime from "../../helpers/getCurrentDateTime.js";
@@ -117,6 +118,54 @@ const getAllChapter = async (req, res) => {
 
     const allChaptersData = await getAllChapterDataService({
       status: Status.Active,
+    });
+
+    if (!allChaptersData.length) {
+      return sendResponse(res, 404, true, "Chapters not found");
+    }
+    return sendResponse(
+      res,
+      200,
+      false,
+      "Chapters fetched successfully",
+      allChaptersData
+    );
+  } catch (error) {
+    console.error("Error in fetching Chapters Data:", error);
+    return sendResponse(res, 500, true, "Internal Server Error");
+  }
+};
+
+const getChapterManagerChapters = async (req, res) => {
+  try {
+    console.log("Get Chapter Managers Chapter Data API Called");
+    console.log("Req Body Parameters:----->", req.body);
+
+    const { chapter_manager_id } = req.body;
+
+    if (!chapter_manager_id) {
+      return sendResponse(res, 404, true, "Chapter Manager Id not Provided");
+    }
+
+    const chapterManagerDetails = await findOneUserDataService({
+      _id: chapter_manager_id,
+      status: Status.Active,
+      accessLevel: AccessLevel.ChapterManager,
+    });
+
+    if (!chapterManagerDetails) {
+      return sendResponse(res, 404, true, "Chapter Manager not found");
+    }
+
+    const assignedChapters = chapterManagerDetails._doc.Chapters;
+
+    const chapterIds = [
+      ...new Set(assignedChapters.map((data) => data.chapter_id)),
+    ];
+
+    const allChaptersData = await getAllChapterDataService({
+      status: Status.Active,
+      _id: { $in: chapterIds },
     });
 
     if (!allChaptersData.length) {
@@ -303,6 +352,7 @@ const getPaginatedChaptersData = async (req, res) => {
 export {
   createChapter,
   getAllChapter,
+  getChapterManagerChapters,
   getChapterById,
   updateChapter,
   deleteChapter,
