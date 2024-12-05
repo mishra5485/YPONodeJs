@@ -6,7 +6,10 @@ import {
   countChapters,
   deleteChapterByIdService,
 } from "../../services/ChapterServices.js";
-import { findOneUserDataService } from "../../services/UserServices.js";
+import {
+  findOneUserDataService,
+  getAllUsersDataService,
+} from "../../services/UserServices.js";
 
 import { v4 as uuidv4 } from "uuid";
 import * as fs from "fs";
@@ -282,6 +285,23 @@ const deleteChapter = async (req, res) => {
     if (!chapterData) {
       return sendResponse(res, 404, true, "Chapter not found");
     }
+
+    const userFilterQuery = {
+      "Chapters.chapter_id": chapter_id,
+      status: Status.Active,
+    };
+
+    const chapterUsersData = await getAllUsersDataService(userFilterQuery);
+
+    if (chapterUsersData.length > 0) {
+      return sendResponse(
+        res,
+        404,
+        true,
+        `Users are associated with the ${chapterData._doc.chapter_Name}`
+      );
+    }
+
     const chapterLogoImagePath = chapterData.chapter_Logo;
 
     // Remove Chapter Logo Image
