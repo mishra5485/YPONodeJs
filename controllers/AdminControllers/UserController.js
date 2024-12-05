@@ -110,10 +110,12 @@ const createUser = async (req, res) => {
 
     const trimmedMemberId = member_id.trim();
     const memberIdRegex = new RegExp(`^${trimmedMemberId}$`, "i");
-
     const trimmedUserName = userName.trim();
 
-    const filterQuery = { member_id: memberIdRegex };
+    const filterQuery = {
+      member_id: memberIdRegex,
+      status: { $in: [Status.Active, Status.UnderApproval] },
+    };
 
     const existingMember = await findOneUserDataService(filterQuery);
     if (existingMember) {
@@ -137,6 +139,126 @@ const createUser = async (req, res) => {
         userCreationAccesslevel == AccessLevel.ChapterManager
           ? Status.UnderApproval
           : Status.Active,
+    };
+
+    try {
+      const newUser = await createUserService(UserObj);
+      return sendResponse(
+        res,
+        201,
+        false,
+        "User Created successfully",
+        newUser
+      );
+    } catch (dbError) {
+      console.error("Error creating User in database:", dbError);
+      return sendResponse(res, 500, true, "Error creating User");
+    }
+  } catch (error) {
+    console.error("Create User Error:", error);
+    return sendResponse(res, 500, true, "Internal Server Error");
+  }
+};
+
+const createUserbyChapterManager = async (req, res) => {
+  try {
+    console.log("Create User by Chapter Manager API Called");
+    console.log("Req Body Parameters:----->", req.body);
+
+    const {
+      member_id,
+      accessLevel,
+      Chapters,
+      userName,
+      region = "South Asia",
+      created_userid,
+    } = req.body;
+
+    if (!member_id) {
+      return sendResponse(res, 400, true, "MemberID is required");
+    }
+
+    if (!accessLevel || !Object.values(AccessLevel).includes(accessLevel)) {
+      return sendResponse(res, 400, true, "Invalid or missing Access Level");
+    }
+
+    if (!userName) {
+      return sendResponse(res, 400, true, "Username is required");
+    }
+
+    if (Chapters) {
+      if (!Array.isArray(Chapters)) {
+        return sendResponse(
+          res,
+          400,
+          true,
+          "Chapters must be an array of objects"
+        );
+      }
+
+      const isValidChapters = Chapters.every(
+        (chapter) =>
+          typeof chapter == "object" &&
+          chapter != null &&
+          typeof chapter.chapter_id == "string"
+      );
+
+      if (!isValidChapters) {
+        return sendResponse(
+          res,
+          400,
+          true,
+          "Each Chapter must be an object with a 'chapter_id' string"
+        );
+      }
+
+      const notFoundChapters = await fetchChapterDetailsFromDbService(Chapters);
+      if (notFoundChapters.length > 0) {
+        return sendResponse(res, 404, true, `Selected Chapter(s) Not Found`);
+      }
+    }
+
+    if (!created_userid) {
+      return sendResponse(res, 400, true, "UserId is required");
+    }
+
+    const userCreationIDExists = await findOneUserDataService({
+      _id: created_userid,
+    });
+
+    if (!userCreationIDExists) {
+      return sendResponse(res, 404, true, "User Details not found");
+    }
+
+    const trimmedMemberId = member_id.trim();
+    const memberIdRegex = new RegExp(`^${trimmedMemberId}$`, "i");
+    const trimmedUserName = userName.trim();
+
+    const filterQuery = {
+      member_id: memberIdRegex,
+      status: { $in: [Status.Active, Status.UnderApproval] },
+    };
+
+    const existingMember = await findOneUserDataService(filterQuery);
+    if (existingMember) {
+      return sendResponse(res, 409, true, "MemberId Already Exists");
+    }
+
+    const hashedPassword = await bcrypt.hash("1234", saltRounds);
+
+    const UserObj = {
+      _id: uuidv4(),
+      member_id,
+      accessLevel,
+      Chapters: Chapters ? Chapters : [],
+      userName: trimmedUserName,
+      password: hashedPassword,
+      region,
+      filterationDateTime: getAsiaCalcuttaCurrentDateTimeinIsoFormat(),
+      createdAt: getCurrentDateTime(),
+      created_userid: created_userid,
+      Action: "Create",
+      status: Status.UnderApproval,
     };
 
     try {
@@ -694,7 +816,6 @@ const getAllChapterUsers = async (req, res) => {
 
     const userFilterQuery = {
       "Chapters.chapter_id": chapter_id,
-      status: Status.Active,
     };
 
     const chapterUsersData = await getAllUsersDataService(userFilterQuery);
@@ -900,6 +1021,7 @@ const downloadUserCard = async (req, res) => {
 
 export {
   createUser,
+  createUserbyChapterManager,
   userLogin,
   getSuperAdminDashBoardData,
   getChapterManagerDashBoardData,

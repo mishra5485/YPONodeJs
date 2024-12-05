@@ -19,6 +19,7 @@ const UsersSchema = new mongoose.Schema({
   createdAt: { type: String, required: true },
   status: { type: Number, required: true },
   created_userid: { type: String },
+  Action: { type: String },
   resetPasswordToken: { type: String, default: undefined },
   resetPasswordExpires: { type: String, default: undefined },
 });

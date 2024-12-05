@@ -3,6 +3,7 @@ const router = express.Router();
 
 import {
   createUser,
+  createUserbyChapterManager,
   userLogin,
   getSuperAdminDashBoardData,
   getChapterManagerDashBoardData,
@@ -22,6 +23,8 @@ import {
 } from "../../controllers/AdminControllers/UserController.js";
 
 router.post("/create", createUser);
+
+router.post("/createUserbyChapterManager", createUserbyChapterManager);
 
 router.post("/login", userLogin);
 
