@@ -629,12 +629,17 @@ const getSuperAdminDashBoardData = async (req, res) => {
       status: Status.Active,
     });
 
+    const pendingApprovalData = await getAllUsersDataService({
+      status: Status.UnderApproval,
+    });
+
     const respObj = {
       superAdminsDatalength: superAdminsData.length,
       membersDatalength: membersData.length,
       spousePartnersDatalength: spousePartnersData.length,
       allChaptersDatalength: allChaptersData.length,
       chapterManagersDatalength: chapterManagersData.length,
+      pendingApprovalDatalength: pendingApprovalData.length,
     };
 
     return sendResponse(
