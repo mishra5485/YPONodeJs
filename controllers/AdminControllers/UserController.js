@@ -635,7 +635,6 @@ const getAllSuperAdmins = async (req, res) => {
 
     const superAdminsData = await getAllUsersDataService({
       accessLevel: AccessLevel.SuperAdmin,
-      status: Status.Active,
     });
 
     if (!superAdminsData.length) {
@@ -720,7 +719,6 @@ const getAllMembers = async (req, res) => {
 
     const membersData = await getAllUsersDataService({
       accessLevel: AccessLevel.Member,
-      status: Status.Active,
     });
 
     if (!membersData.length) {
@@ -747,7 +745,6 @@ const getAllSpousePartners = async (req, res) => {
 
     const spousePartnersData = await getAllUsersDataService({
       accessLevel: AccessLevel["Spouse/Partner"],
-      status: Status.Active,
     });
 
     if (!spousePartnersData.length) {
