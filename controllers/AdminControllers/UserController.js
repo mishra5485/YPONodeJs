@@ -280,6 +280,84 @@ const createUserbyChapterManager = async (req, res) => {
   }
 };
 
+const getAllUnderApprovalUsersData = async (req, res) => {
+  try {
+    console.log("Get All UnderApproval Users Data API Called");
+    console.log("Req Body Parameters:-----> " + JSON.stringify(req.body));
+
+    const { superAdmin_id } = req.body;
+
+    if (!superAdmin_id) {
+      return sendResponse(res, 400, true, "SuperAdmin Id is required");
+    }
+
+    const superAdminExists = await findOneUserDataService({
+      _id: superAdmin_id,
+      accessLevel: AccessLevel.SuperAdmin,
+    });
+
+    if (!superAdminExists) {
+      return sendResponse(res, 404, true, "SuperAdmin Not not found");
+    }
+
+    const underApprovalUsersData = await getAllUsersDataService({
+      status: Status.UnderApproval,
+    });
+
+    if (underApprovalUsersData.length == 0) {
+      return sendResponse(res, 404, true, "No Approval requests found");
+    }
+
+    const formattedApprovalRequests = await Promise.all(
+      underApprovalUsersData.map(async (usersData) => {
+        const userRole = usersData._doc.accessLevel;
+        const usersAssignedChapters = usersData._doc.Chapters;
+
+        const updatedChapters = await Promise.all(
+          usersAssignedChapters.map(async (chapter) => {
+            const chapterFilterQuery = {
+              _id: chapter.chapter_id,
+            };
+            const ChapterData = await findOneChapterDataService(
+              chapterFilterQuery
+            );
+            return {
+              ...chapter,
+              ChapterName: ChapterData?._doc?.chapter_Name || "Unknown",
+            };
+          })
+        );
+
+        const updatedObj = {
+          ...usersData._doc,
+          Chapters: updatedChapters,
+        };
+
+        if (userRole == AccessLevel.Member) {
+          updatedObj.Role = "Member";
+        }
+
+        if (userRole == AccessLevel["Spouse/Partner"]) {
+          updatedObj.Role = "Spouse/Partner";
+        }
+
+        return updatedObj;
+      })
+    );
+
+    return sendResponse(
+      res,
+      200,
+      false,
+      "Approval requests Data fetched successfully",
+      formattedApprovalRequests
+    );
+  } catch (error) {
+    console.error("Error in fetching Approval requests Data:", error);
+    return sendResponse(res, 500, true, "Internal Server Error");
+  }
+};
+
 const userLogin = async (req, res) => {
   try {
     console.log("User Login API Called");
@@ -1019,6 +1097,7 @@ const downloadUserCard = async (req, res) => {
 export {
   createUser,
   createUserbyChapterManager,
+  getAllUnderApprovalUsersData,
   userLogin,
   getSuperAdminDashBoardData,
   getChapterManagerDashBoardData,
