@@ -20,36 +20,46 @@
         color: white;
         width: 300px;
         height: 450px;
-
         padding: 20px;
         border-radius: 10px;
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
         text-align: center;
+        position: relative;
       }
 
-      .card .logo {
-        width: 150px;
-        height: 150px;
-        margin: 0 auto 15px;
+      .logo {
+        position: absolute;
+        width: 100px;
+        height: 100px;
       }
 
-      .card .name {
+      .logo-top-left {
+        top: 20px;
+        left: 20px;
+      }
+
+      .logo-top-right {
+        top: 20px;
+        right: 20px;
+      }
+
+      .name {
         font-size: 24px;
         font-weight: bold;
-        margin-bottom: 10px;
+        margin: 100px 0 10px;
       }
 
-      .card .member-id {
+      .member-id {
         font-size: 22px;
         margin-bottom: 15px;
       }
 
-      .card .communication {
+      .communication {
         font-size: 20px;
         margin-bottom: 15px;
       }
 
-      .card .qr-code {
+      .qr-code {
         margin-top: 15px;
       }
 
@@ -61,8 +71,9 @@
   </head>
   <body>
     <div class="card">
-      <img class="logo" src="<%= logoUrl %>" alt="YPO Logo" />
-      <div class="name"><%= username %></div>
+      <img class="logo logo-top-left" src="<%= logoUrl1 %>" alt="Logo 1" />
+      <img class="logo logo-top-right" src="<%= logoUrl2 %>" alt="Logo 2" />
+      <div class="name" style="margin-top: 152px"><%= username %></div>
       <div class="member-id">Member ID: <%= member_id %></div>
       <div class="communication"><%= Alias %></div>
       <div class="qr-code">
