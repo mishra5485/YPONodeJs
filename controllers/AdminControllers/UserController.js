@@ -271,7 +271,7 @@ const getSuperAdminDashBoardData = async (req, res) => {
 
 const getChapterManagerDashBoardData = async (req, res) => {
   try {
-    console.log("Get All SuperAdmins Dashboard Data API Called");
+    console.log("Get All ChapterManager Dashboard Data API Called");
     console.log("Req Body Parameters:-----> " + JSON.stringify(req.body));
 
     const { chapter_manager_id } = req.body;
@@ -322,6 +322,57 @@ const getChapterManagerDashBoardData = async (req, res) => {
           membersDataCount: membersData?.length,
           spousePartnersDataCount: spousePartnersData?.length,
           pendingApprovalsDataCount: pendingApprovalsData?.length,
+        };
+      })
+    );
+
+    return sendResponse(
+      res,
+      200,
+      false,
+      "Chapter Managers Dashboard Data fetched successfully",
+      formattedResponseObj
+    );
+  } catch (error) {
+    console.error("Error in fetching Users Data:", error);
+    return sendResponse(res, 500, true, "Internal Server Error");
+  }
+};
+
+const getChapterManagersChapter = async (req, res) => {
+  try {
+    console.log("Get All ChapterManagers Chapters Data API Called");
+    console.log("Req Body Parameters:-----> " + JSON.stringify(req.body));
+
+    const { chapter_manager_id } = req.body;
+
+    if (!chapter_manager_id) {
+      return sendResponse(res, 400, true, "Chapter ManagerId is required");
+    }
+
+    const chapterManagerDetails = await findOneUserDataService({
+      _id: chapter_manager_id,
+      status: Status.Active,
+      accessLevel: AccessLevel.ChapterManager,
+    });
+
+    if (!chapterManagerDetails) {
+      return sendResponse(res, 404, true, "Chapter Manager not found");
+    }
+
+    const assignedChapters = chapterManagerDetails._doc.Chapters;
+
+    const formattedResponseObj = await Promise.all(
+      assignedChapters.map(async (data) => {
+        const chapter_id = data.chapter_id;
+        const chapterDetails = await findOneChapterDataService({
+          _id: chapter_id,
+        });
+        const chapterName = chapterDetails._doc.chapter_Name;
+
+        return {
+          chapterName: chapterName,
+          chapter_id: chapter_id,
         };
       })
     );
@@ -817,6 +868,7 @@ export {
   userLogin,
   getSuperAdminDashBoardData,
   getChapterManagerDashBoardData,
+  getChapterManagersChapter,
   updateUserName,
   getUserbyId,
   userChangePassword,
