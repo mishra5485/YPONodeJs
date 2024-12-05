@@ -6,6 +6,7 @@ import {
   createUserbyChapterManager,
   deleteUserbyChapterManager,
   getAllUnderApprovalUsersData,
+  acceptApproval,
   userLogin,
   getSuperAdminDashBoardData,
   getChapterManagerDashBoardData,
@@ -31,6 +32,8 @@ router.post("/createUserbyChapterManager", createUserbyChapterManager);
 router.post("/deleteUserbyChapterManager", deleteUserbyChapterManager);
 
 router.post("/getAllUnderApprovalUsersData", getAllUnderApprovalUsersData);
+
+router.post("/acceptApproval", acceptApproval);
 
 router.post("/login", userLogin);
 

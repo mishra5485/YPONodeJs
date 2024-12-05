@@ -415,6 +415,68 @@ const getAllUnderApprovalUsersData = async (req, res) => {
   }
 };
 
+const acceptApproval = async (req, res) => {
+  try {
+    console.log("Accept Approval by SuperAdmin API Called");
+    console.log("Req Body Parameters:-----> " + JSON.stringify(req.body));
+
+    const { user_id, superAdmin_id } = req.body;
+
+    if (!user_id) {
+      return sendResponse(res, 400, true, "User ID not provided");
+    }
+
+    if (!superAdmin_id) {
+      return sendResponse(res, 400, true, "SuperAdmin Id is required");
+    }
+
+    const superAdminDetails = await findOneUserDataService({
+      _id: superAdmin_id,
+      status: Status.Active,
+      accessLevel: AccessLevel.SuperAdmin,
+    });
+
+    if (!superAdminDetails) {
+      return sendResponse(res, 404, true, "SuperAdmin not found");
+    }
+
+    const userData = await findOneUserDataService({
+      _id: user_id,
+    });
+
+    if (!userData) {
+      return sendResponse(res, 404, true, "User not found");
+    }
+    const Operation = userData._doc.Action;
+
+    if (Operation == "Create") {
+      userData.status = Status.Active;
+      userData.Action = null;
+      userData.save();
+      return sendResponse(res, 200, false, "Request Approved Successfully");
+    }
+
+    if (Operation == "Delete") {
+      try {
+        const deleteQuery = { _id: user_id };
+        const result = await deleteUserByIdService(deleteQuery);
+
+        if (result.deletedCount === 1) {
+          return sendResponse(res, 200, false, "Request Approved Successfully");
+        } else {
+          return sendResponse(res, 409, true, "Failed to Approve the Request");
+        }
+      } catch (dbError) {
+        console.error("Error deleting User from database:", dbError);
+        return sendResponse(res, 500, true, "Error deleting User");
+      }
+    }
+  } catch (error) {
+    console.error("Delete User Error:", error);
+    return sendResponse(res, 500, true, "Internal Server Error");
+  }
+};
+
 const userLogin = async (req, res) => {
   try {
     console.log("User Login API Called");
@@ -1156,6 +1218,7 @@ export {
   createUserbyChapterManager,
   deleteUserbyChapterManager,
   getAllUnderApprovalUsersData,
+  acceptApproval,
   userLogin,
   getSuperAdminDashBoardData,
   getChapterManagerDashBoardData,
