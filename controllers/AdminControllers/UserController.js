@@ -347,24 +347,41 @@ const deleteUserbyChapterManager = async (req, res) => {
 
     userData.status = Status.UnderApproval;
     userData.Action = "Delete";
+    try {
+      userData.save();
 
-    userData.save();
+      const transporter = nodemailer.createTransport({
+        host: process.env.EMAIL_SERVICE_HOST,
+        port: process.env.EMAIL_SERVICE_PORT,
+        secure: false,
+        auth: {
+          user: process.env.EMAIL_SERVICE_USERNAME,
+          pass: process.env.EMAIL_SERVICE_PASSWORD,
+        },
+      });
 
-    return sendResponse(res, 200, false, "Sent for Approval");
+      const mailOptions = {
+        from: process.env.EMAIL_SENDER_NAME,
+        to: "Harshmishra5485@gmail.com",
+        cc: ["harsh@digitalcube.tech", "ashaabikawat@gmail.com"],
+        subject: "New User Request Received",
+        html: `
+          <p>Hello Superadmin,</p>
+          <p>A new user creation request has been received with the following details:</p>
+          <p>Please review the request at your earliest convenience.</p>
+          <p>Thank you,</p>
+          <p>Your App Team</p>
+        `,
+      };
 
-    // try {
-    //   const deleteQuery = { _id: user_id };
-    //   const result = await deleteUserByIdService(deleteQuery);
+      await transporter.sendMail(mailOptions);
+      console.log("Acknowledgment email sent to Superadmin");
 
-    //   if (result.deletedCount === 1) {
-    //     return sendResponse(res, 200, false, "User deleted successfully");
-    //   } else {
-    //     return sendResponse(res, 409, true, "Failed to delete User");
-    //   }
-    // } catch (dbError) {
-    //   console.error("Error deleting User from database:", dbError);
-    //   return sendResponse(res, 500, true, "Error deleting User");
-    // }
+      return sendResponse(res, 200, false, "Sent for Approval");
+    } catch (dbError) {
+      console.error("Error creating User in database:", dbError);
+      return sendResponse(res, 500, true, "Error creating User");
+    }
   } catch (error) {
     console.error("Delete User Error:", error);
     return sendResponse(res, 500, true, "Internal Server Error");
