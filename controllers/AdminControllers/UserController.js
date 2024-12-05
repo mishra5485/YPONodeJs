@@ -16,7 +16,7 @@ import { v4 as uuidv4 } from "uuid";
 const saltRounds = 10;
 import bcrypt from "bcrypt";
 import ExcelJS from "exceljs";
-
+import nodemailer from "nodemailer";
 import puppeteer from "puppeteer";
 
 import generateAuthToken from "../../helpers/auth.js";
@@ -263,6 +263,40 @@ const createUserbyChapterManager = async (req, res) => {
 
     try {
       const newUser = await createUserService(UserObj);
+
+      const transporter = nodemailer.createTransport({
+        host: process.env.EMAIL_SERVICE_HOST,
+        port: process.env.EMAIL_SERVICE_PORT,
+        secure: false,
+        auth: {
+          user: process.env.EMAIL_SERVICE_USERNAME,
+          pass: process.env.EMAIL_SERVICE_PASSWORD,
+        },
+      });
+
+      const mailOptions = {
+        from: process.env.EMAIL_SENDER_NAME,
+        to: "Harshmishra5485@gmail.com",
+        cc: ["harsh@digitalcube.tech", "ashaabikawat@gmail.com"],
+        subject: "New User Request Received",
+        html: `
+          <p>Hello Superadmin,</p>
+          <p>A new user creation request has been received with the following details:</p>
+          <ul>
+            <li><b>Member ID:</b> ${member_id}</li>
+            <li><b>Username:</b> ${userName}</li>
+            <li><b>Access Level:</b> ${accessLevel}</li>
+            <li><b>Region:</b> ${region}</li>
+          </ul>
+          <p>Please review the request at your earliest convenience.</p>
+          <p>Thank you,</p>
+          <p>Your App Team</p>
+        `,
+      };
+
+      await transporter.sendMail(mailOptions);
+      console.log("Acknowledgment email sent to Superadmin");
+
       return sendResponse(res, 201, false, "Sent for Approval", newUser);
     } catch (dbError) {
       console.error("Error creating User in database:", dbError);
