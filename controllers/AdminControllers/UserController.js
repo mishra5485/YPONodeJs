@@ -754,37 +754,6 @@ const deleteUser = async (req, res) => {
   }
 };
 
-const getUserCardData = async (user_id) => {
-  if (!user_id) {
-    throw new Error("Invalid User ID");
-  }
-
-  // Fetch user details
-  const UserDetails = await findOneUserDataService({
-    _id: user_id,
-    status: Status.Active,
-  });
-  if (!UserDetails) {
-    throw new Error("User not found");
-  }
-
-  // Generate QR Code URL
-  const qrCodeUrl = await generateQRCode(
-    `${ServerBase_Url}/user/rndcard/${user_id}`
-  );
-
-  // Prepare rendering data
-  const renderingData = {
-    logoUrl: `${ServerBase_Url}/Assets/YpoCardLogo.png`,
-    username: UserDetails._doc.userName,
-    member_id: UserDetails._doc.member_id,
-    Alias: UserDetails._doc.Alias,
-    qrCodeUrl: qrCodeUrl,
-  };
-
-  return renderingData;
-};
-
 const renderUserCard = async (req, res) => {
   try {
     console.log("Render User Card API Called");
@@ -882,14 +851,75 @@ const downloadUserCard = async (req, res) => {
 
     const user_id = req.params.user_id;
 
-    const renderingData = await getUserCardData(user_id);
+    if (!user_id) {
+      return res.status(404).render("InvalidUserId");
+    }
 
-    // Generate HTML content using the helper function
-    const htmlContent = await renderTemplate(
-      res,
-      "SuperAdminCard",
-      renderingData
-    );
+    const UserDetails = await findOneUserDataService({
+      _id: user_id,
+      status: Status.Active,
+    });
+    if (!UserDetails) {
+      return res.status(404).render("InvalidUserId");
+    }
+
+    const userRole = UserDetails._doc.accessLevel;
+
+    let htmlContent;
+
+    if (userRole == AccessLevel.SuperAdmin) {
+      // Generate QR Code URL
+      const qrCodeUrl = await generateQRCode(
+        `${ServerBase_Url}/user/rndcard/${user_id}`
+      );
+
+      // Prepare rendering data
+      const renderingData = {
+        logoUrl: `${ServerBase_Url}/Assets/YpoCardLogo.png`,
+        username: UserDetails._doc.userName,
+        member_id: UserDetails._doc.member_id,
+        Alias: UserDetails._doc.Alias,
+        qrCodeUrl: qrCodeUrl,
+      };
+
+      htmlContent = await renderTemplate(res, "SuperAdminCard", renderingData);
+    } else {
+      const qrCodeUrl = await generateQRCode(
+        `${ServerBase_Url}/user/rndcard/${user_id}`
+      );
+
+      const assignedChapters = UserDetails._doc.Chapters;
+
+      const firstChapter_id = assignedChapters[0].chapter_id;
+
+      const chapterDetails = await findOneChapterDataService({
+        _id: firstChapter_id,
+      });
+      const chapter_Logo = chapterDetails._doc.chapter_Logo;
+
+      // Prepare rendering data
+      const renderingData = {
+        logoUrl1: `${ServerBase_Url}/Assets/YpoCardLogo.png`,
+        logoUrl2: `${ServerBase_Url}/${chapter_Logo}`,
+        username: UserDetails._doc.userName,
+        member_id: UserDetails._doc.member_id,
+        qrCodeUrl: qrCodeUrl,
+      };
+
+      if (userRole == AccessLevel.ChapterManager) {
+        renderingData.Alias = "Chapter Manager";
+      }
+
+      if (userRole == AccessLevel["Spouse/Partner"]) {
+        renderingData.Alias = "Spouse/Partner";
+      }
+
+      if (userRole == AccessLevel.Member) {
+        renderingData.Alias = "Member";
+      }
+
+      htmlContent = await renderTemplate(res, "OtherUsersCard", renderingData);
+    }
 
     // Generate the image using Puppeteer
     const browser = await puppeteer.launch();
