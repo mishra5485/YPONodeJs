@@ -4,6 +4,7 @@ const router = express.Router();
 import {
   createUser,
   createUserbyChapterManager,
+  deleteUserbyChapterManager,
   getAllUnderApprovalUsersData,
   userLogin,
   getSuperAdminDashBoardData,
@@ -26,6 +27,8 @@ import {
 router.post("/create", createUser);
 
 router.post("/createUserbyChapterManager", createUserbyChapterManager);
+
+router.post("/deleteUserbyChapterManager", deleteUserbyChapterManager);
 
 router.post("/getAllUnderApprovalUsersData", getAllUnderApprovalUsersData);
 

@@ -263,19 +263,76 @@ const createUserbyChapterManager = async (req, res) => {
 
     try {
       const newUser = await createUserService(UserObj);
-      return sendResponse(
-        res,
-        201,
-        false,
-        "User Created successfully",
-        newUser
-      );
+      return sendResponse(res, 201, false, "Sent for Approval", newUser);
     } catch (dbError) {
       console.error("Error creating User in database:", dbError);
       return sendResponse(res, 500, true, "Error creating User");
     }
   } catch (error) {
     console.error("Create User Error:", error);
+    return sendResponse(res, 500, true, "Internal Server Error");
+  }
+};
+
+const deleteUserbyChapterManager = async (req, res) => {
+  try {
+    console.log("Delete User API Called");
+    console.log("Req Body Parameters:-----> " + JSON.stringify(req.body));
+
+    const { user_id, chapter_manager_id } = req.body;
+
+    if (!user_id) {
+      return sendResponse(res, 400, true, "User ID not provided");
+    }
+
+    if (!chapter_manager_id) {
+      return sendResponse(res, 400, true, "Chapter ManagerId is required");
+    }
+
+    const chapterManagerDetails = await findOneUserDataService({
+      _id: chapter_manager_id,
+      status: Status.Active,
+      accessLevel: AccessLevel.ChapterManager,
+    });
+
+    if (!chapterManagerDetails) {
+      return sendResponse(res, 404, true, "Chapter Manager not found");
+    }
+
+    const userData = await findOneUserDataService({
+      _id: user_id,
+    });
+
+    if (!userData) {
+      return sendResponse(res, 404, true, "User not found");
+    }
+
+    if (userData._doc.status != Status.Active) {
+      return sendResponse(res, 403, true, "Only Active users can be deleted");
+    }
+
+    userData.status = Status.UnderApproval;
+    userData.Action = "Delete";
+
+    userData.save();
+
+    return sendResponse(res, 200, false, "Sent for Approval");
+
+    // try {
+    //   const deleteQuery = { _id: user_id };
+    //   const result = await deleteUserByIdService(deleteQuery);
+
+    //   if (result.deletedCount === 1) {
+    //     return sendResponse(res, 200, false, "User deleted successfully");
+    //   } else {
+    //     return sendResponse(res, 409, true, "Failed to delete User");
+    //   }
+    // } catch (dbError) {
+    //   console.error("Error deleting User from database:", dbError);
+    //   return sendResponse(res, 500, true, "Error deleting User");
+    // }
+  } catch (error) {
+    console.error("Delete User Error:", error);
     return sendResponse(res, 500, true, "Internal Server Error");
   }
 };
@@ -1097,6 +1154,7 @@ const downloadUserCard = async (req, res) => {
 export {
   createUser,
   createUserbyChapterManager,
+  deleteUserbyChapterManager,
   getAllUnderApprovalUsersData,
   userLogin,
   getSuperAdminDashBoardData,
