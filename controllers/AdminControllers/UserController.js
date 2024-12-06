@@ -26,6 +26,7 @@ import { generateQRCode } from "../../helpers/commonFunctions.js";
 import getCurrentDateTime from "../../helpers/getCurrentDateTime.js";
 import { AccessLevel, Status, ServerBase_Url } from "../../helpers/Enum.js";
 import { getAsiaCalcuttaCurrentDateTimeinIsoFormat } from "../../helpers/DateTime.js";
+import { NewRequestTemplate } from "../../EmailTemplates/NewRequestTemplate.js";
 
 const renderTemplate = (res, templateName, data) => {
   return new Promise((resolve, reject) => {
@@ -279,19 +280,7 @@ const createUserbyChapterManager = async (req, res) => {
         to: "Harshmishra5485@gmail.com",
         cc: ["harsh@digitalcube.tech", "ashaabikawat@gmail.com"],
         subject: "New User Request Received",
-        html: `
-          <p>Hello Superadmin,</p>
-          <p>A new user creation request has been received with the following details:</p>
-          <ul>
-            <li><b>Member ID:</b> ${member_id}</li>
-            <li><b>Username:</b> ${userName}</li>
-            <li><b>Access Level:</b> ${accessLevel}</li>
-            <li><b>Region:</b> ${region}</li>
-          </ul>
-          <p>Please review the request at your earliest convenience.</p>
-          <p>Thank you,</p>
-          <p>Your App Team</p>
-        `,
+        html: NewRequestTemplate(),
       };
 
       await transporter.sendMail(mailOptions);
@@ -365,13 +354,7 @@ const deleteUserbyChapterManager = async (req, res) => {
         to: "Harshmishra5485@gmail.com",
         cc: ["harsh@digitalcube.tech", "ashaabikawat@gmail.com"],
         subject: "New User Request Received",
-        html: `
-          <p>Hello Superadmin,</p>
-          <p>A new user creation request has been received with the following details:</p>
-          <p>Please review the request at your earliest convenience.</p>
-          <p>Thank you,</p>
-          <p>Your App Team</p>
-        `,
+        html: NewRequestTemplate(),
       };
 
       await transporter.sendMail(mailOptions);
