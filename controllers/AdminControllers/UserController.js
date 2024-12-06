@@ -22,7 +22,7 @@ import puppeteer from "puppeteer";
 import generateAuthToken from "../../helpers/auth.js";
 import sendResponse from "../../helpers/sendResponse.js";
 import { encrypt } from "../../helpers/encryptionUtils.js";
-import { generateQRCode } from "../../helpers/commonFunctions.js";
+import { generateQRCode, MailCCUsers } from "../../helpers/commonFunctions.js";
 import getCurrentDateTime from "../../helpers/getCurrentDateTime.js";
 import { AccessLevel, Status, ServerBase_Url } from "../../helpers/Enum.js";
 import { getAsiaCalcuttaCurrentDateTimeinIsoFormat } from "../../helpers/DateTime.js";
@@ -278,7 +278,7 @@ const createUserbyChapterManager = async (req, res) => {
       const mailOptions = {
         from: process.env.EMAIL_SENDER_NAME,
         to: "Harshmishra5485@gmail.com",
-        cc: ["harsh@digitalcube.tech", "ashaabikawat@gmail.com"],
+        cc: MailCCUsers,
         subject: "New User Request Received",
         html: NewRequestTemplate(),
       };
@@ -352,7 +352,7 @@ const deleteUserbyChapterManager = async (req, res) => {
       const mailOptions = {
         from: process.env.EMAIL_SENDER_NAME,
         to: "Harshmishra5485@gmail.com",
-        cc: ["harsh@digitalcube.tech", "ashaabikawat@gmail.com"],
+        cc: MailCCUsers,
         subject: "New User Request Received",
         html: NewRequestTemplate(),
       };

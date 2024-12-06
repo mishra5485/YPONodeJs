@@ -9,4 +9,6 @@ const generateQRCode = async (qrObj) => {
   return QRCode.toDataURL(qrString);
 };
 
-export { sanitizeFileName, generateQRCode };
+const MailCCUsers = ["harsh@digitalcube.tech", "ashaabikawat@gmail.com"];
+
+export { sanitizeFileName, generateQRCode, MailCCUsers };
