@@ -1178,7 +1178,6 @@ const fetchUserDetails = async (user_id) => {
 
   const UserDetails = await findOneUserDataService({
     _id: user_id,
-    status: Status.Active,
   });
 
   if (!UserDetails) {
