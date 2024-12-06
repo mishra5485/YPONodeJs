@@ -31,7 +31,7 @@ const NewRequestTemplate = (
             <!-- Button Section -->
             <tr>
               <td align="center" style="padding: 20px;">
-                <a href="${process.env.ADMIN_PANEL_BASE_URL}" style="display: inline-block; background-color: #007bff; color: #ffffff; text-decoration: none; padding: 10px 20px; border-radius: 5px; font-size: 16px; font-weight: bold;">Check Now</a>
+                <a href="${process.env.ADMIN_PANEL_BASE_URL}/sp/dashboard/sarequests" style="display: inline-block; background-color: #007bff; color: #ffffff; text-decoration: none; padding: 10px 20px; border-radius: 5px; font-size: 16px; font-weight: bold;">Check Now</a>
               </td>
             </tr>
             <!-- Footer Section -->
