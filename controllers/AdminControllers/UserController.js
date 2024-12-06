@@ -738,6 +738,7 @@ const getChapterManagerDashBoardData = async (req, res) => {
         });
 
         return {
+          chapter_id: chapter_id,
           chapterName: chapterName,
           membersDataCount: membersData?.length,
           spousePartnersDataCount: spousePartnersData?.length,
