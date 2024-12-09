@@ -29,18 +29,24 @@
 
       .logo {
         position: absolute;
-        width: 100px;
-        height: 100px;
+        width: 90px;
+        height: 90px;
+      }
+
+      .chapter_logo {
+        position: absolute;
+        width: 150px;
+        height: 150px;
       }
 
       .logo-top-left {
-        top: 20px;
+        top: 42px;
         left: 20px;
       }
 
       .logo-top-right {
         top: 20px;
-        right: 20px;
+        right: 2px;
       }
 
       .name {
@@ -72,7 +78,11 @@
   <body>
     <div class="card">
       <img class="logo logo-top-left" src="<%= logoUrl1 %>" alt="Logo 1" />
-      <img class="logo logo-top-right" src="<%= logoUrl2 %>" alt="Logo 2" />
+      <img
+        class="chapter_logo logo-top-right"
+        src="<%= logoUrl2 %>"
+        alt="Logo 2"
+      />
       <div class="name" style="margin-top: 152px"><%= username %></div>
       <div class="member-id">Member ID: <%= member_id %></div>
       <div class="communication"><%= Alias %></div>
