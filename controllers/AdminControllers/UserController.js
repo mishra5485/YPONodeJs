@@ -137,7 +137,7 @@ const createUser = async (req, res) => {
       filterationDateTime: getAsiaCalcuttaCurrentDateTimeinIsoFormat(),
       createdAt: getCurrentDateTime(),
       created_userid: created_userid,
-      Alias: Alias ? Alias : null,
+      Alias: Alias ? Alias.trim() : "",
       status:
         userCreationAccesslevel == AccessLevel.ChapterManager
           ? Status.UnderApproval
@@ -935,7 +935,7 @@ const getAllSuperAdmins = async (req, res) => {
     console.log("Get All SuperAdmins Data API Called");
 
     const superAdminsData = await getAllUsersDataService({
-      accessLevel: AccessLevel.SuperAdmin,
+      accessLevel: { $in: [AccessLevel.SuperAdmin, AccessLevel.Others] },
     });
 
     if (!superAdminsData.length) {

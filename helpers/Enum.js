@@ -12,7 +12,7 @@ const AccessLevel = {
   Member: "2",
   "Spouse/Partner": "3",
   ChapterManager: "4",
-  Others: "4",
+  Others: "5",
 };
 
 const ImagesPath = {
