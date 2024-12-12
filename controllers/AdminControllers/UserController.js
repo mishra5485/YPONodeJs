@@ -1194,7 +1194,7 @@ const prepareRenderingData = async (UserDetails, user_id, userRole) => {
     `${ServerBase_Url}/user/rndcard/${user_id}`
   );
 
-  if (userRole == AccessLevel.SuperAdmin) {
+  if (userRole == AccessLevel.SuperAdmin || userRole == AccessLevel.Others) {
     return {
       logoUrl: `${ServerBase_Url}/Assets/YpoCardLogo.png`,
       username: UserDetails._doc.userName,
@@ -1244,7 +1244,9 @@ const renderUserCard = async (req, res) => {
     );
 
     const viewName =
-      userRole == AccessLevel.SuperAdmin ? "SuperAdminCard" : "OtherUsersCard";
+      userRole == AccessLevel.SuperAdmin || userRole == AccessLevel.Others
+        ? "SuperAdminCard"
+        : "OtherUsersCard";
 
     res.render(viewName, renderingData);
   } catch (error) {
