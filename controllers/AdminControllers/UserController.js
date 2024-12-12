@@ -49,6 +49,7 @@ const createUser = async (req, res) => {
       userName,
       region = "South Asia",
       created_userid,
+      Alias,
     } = req.body;
 
     if (!member_id) {
@@ -136,6 +137,7 @@ const createUser = async (req, res) => {
       filterationDateTime: getAsiaCalcuttaCurrentDateTimeinIsoFormat(),
       createdAt: getCurrentDateTime(),
       created_userid: created_userid,
+      Alias: Alias ? Alias : null,
       status:
         userCreationAccesslevel == AccessLevel.ChapterManager
           ? Status.UnderApproval
