@@ -642,7 +642,7 @@ const getSuperAdminDashBoardData = async (req, res) => {
     console.log("Get All SuperAdmins Dashboard Data API Called");
 
     const superAdminsData = await getAllUsersDataService({
-      accessLevel: AccessLevel.SuperAdmin,
+      accessLevel: { $in: [AccessLevel.Others, AccessLevel.SuperAdmin] },
       status: Status.Active,
     });
 
