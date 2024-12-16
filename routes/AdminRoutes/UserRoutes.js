@@ -12,7 +12,7 @@ import {
   getSuperAdminDashBoardData,
   getChapterManagerDashBoardData,
   getChapterManagersChapter,
-  updateUserName,
+  updateUserDetails,
   getUserbyId,
   userChangePassword,
   getAllSuperAdmins,
@@ -46,7 +46,7 @@ router.post("/getChapterManagerDashBoardData", getChapterManagerDashBoardData);
 
 router.post("/getChapterManagersChapter", getChapterManagersChapter);
 
-router.post("/upadtebyId", updateUserName);
+router.post("/upadtebyId", updateUserDetails);
 
 router.post("/getUserbyId", getUserbyId);
 

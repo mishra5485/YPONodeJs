@@ -813,7 +813,7 @@ const getChapterManagersChapter = async (req, res) => {
   }
 };
 
-const updateUserName = async (req, res) => {
+const updateUserDetails = async (req, res) => {
   try {
     console.log("Update User Details By Id Api Called");
     console.log("Req Body Parameters:-----> " + JSON.stringify(req.body));
@@ -1329,7 +1329,7 @@ export {
   getSuperAdminDashBoardData,
   getChapterManagerDashBoardData,
   getChapterManagersChapter,
-  updateUserName,
+  updateUserDetails,
   getUserbyId,
   userChangePassword,
   getAllSuperAdmins,
