@@ -818,13 +818,38 @@ const updateUserDetails = async (req, res) => {
     console.log("Update User Details By Id Api Called");
     console.log("Req Body Parameters:-----> " + JSON.stringify(req.body));
 
-    let { userName, user_id } = req.body;
+    let {
+      user_id,
+      userName,
+      accessLevel,
+      Alias,
+      Chapters,
+      loggedInUser_Id,
+      loggedInUser_Role,
+    } = req.body;
 
     if (!user_id) {
       return sendResponse(res, 400, true, " UserId is required");
     }
 
+    if (!loggedInUser_Id) {
+      return sendResponse(res, 400, true, " loggedInUserId is required");
+    }
+
+    if (!loggedInUser_Role) {
+      return sendResponse(res, 400, true, "loggedInRole is required");
+    }
+
+    const loggedInUserIdExists = await findOneUserDataService({
+      _id: loggedInUser_Id,
+      status: Status.Active,
+    });
+    if (!loggedInUserIdExists) {
+      return sendResponse(res, 404, true, "User not found");
+    }
+
     userName = userName ? userName.trim() : null;
+    Alias = Alias ? Alias.trim() : null;
 
     const userExists = await findOneUserDataService({
       _id: user_id,
@@ -836,6 +861,18 @@ const updateUserDetails = async (req, res) => {
 
     if (userName) {
       userExists.userName = userName;
+    }
+
+    if (accessLevel) {
+      userExists.accessLevel = accessLevel;
+    }
+
+    if (Alias) {
+      userExists.Alias = Alias;
+    }
+
+    if (Chapters) {
+      userExists.Chapters = Chapters;
     }
 
     await userExists.save();
