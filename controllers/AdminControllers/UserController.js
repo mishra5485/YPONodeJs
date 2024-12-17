@@ -560,14 +560,17 @@ const acceptApproval = async (req, res) => {
 
         if (tobeUpdatedName) {
           userData.userName = tobeUpdatedName;
+          userData.tobeUpdatedName = null;
         }
 
-        if (tobeUpdatedChapter) {
+        if (tobeUpdatedChapter.length > 0) {
           userData.Chapters = tobeUpdatedChapter;
+          userData.tobeUpdatedChapter = [];
         }
 
         if (tobeUpdatedAccesslevel) {
           userData.accessLevel = tobeUpdatedAccesslevel;
+          userData.tobeUpdatedAccesslevel = null;
         }
         userData.status = Status.Active;
         userData.save();
@@ -954,15 +957,35 @@ const updateUserDetails = async (req, res) => {
     Alias = Alias ? Alias.trim() : null;
 
     const loggedInUserIdRole = loggedInUserIdExists.accessLevel;
+    const userPreviousChaptersArray = userExists.Chapters;
+
     if (loggedInUserIdRole == AccessLevel.ChapterManager) {
       if (userName != userExists.userName) {
         userExists.tobeUpdatedName = userName;
       }
-      if (Alias != userExists.accessLevel) {
+      if (accessLevel != userExists.accessLevel) {
         userExists.tobeUpdatedAccesslevel = accessLevel;
       }
       if (Chapters && Chapters.length > 0) {
-        userExists.tobeUpdatedChapter = Chapters;
+        function areArraysEqualByKey(arr1, arr2, key) {
+          if (arr1.length != arr2.length) return false;
+
+          const arr1Keys = arr1.map((item) => item[key]).sort();
+          const arr2Keys = arr2.map((item) => item[key]).sort();
+
+          return arr1Keys.every((value, index) => value === arr2Keys[index]);
+        }
+
+        const result = areArraysEqualByKey(
+          userPreviousChaptersArray,
+          Chapters,
+          "chapter_id"
+        );
+        if (result) {
+          userExists.tobeUpdatedChapter = [];
+        } else {
+          userExists.tobeUpdatedChapter = Chapters;
+        }
       }
 
       userExists.status = Status.UnderApproval;
