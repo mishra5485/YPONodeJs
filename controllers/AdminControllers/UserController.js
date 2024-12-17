@@ -333,7 +333,14 @@ const deleteUserbyChapterManager = async (req, res) => {
     }
 
     if (userData._doc.status != Status.Active) {
-      return sendResponse(res, 403, true, "Only Active users can be deleted");
+      const deleteQuery = { _id: user_id };
+      const result = await deleteUserByIdService(deleteQuery);
+
+      if (result.deletedCount === 1) {
+        return sendResponse(res, 200, false, "User Deleted successfully");
+      } else {
+        return sendResponse(res, 409, true, "Failed to Delete the User");
+      }
     }
 
     userData.status = Status.UnderApproval;
