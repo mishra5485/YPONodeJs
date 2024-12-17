@@ -279,7 +279,7 @@ const createUserbyChapterManager = async (req, res) => {
 
       const mailOptions = {
         from: process.env.EMAIL_SENDER_NAME,
-        to: "Harshmishra5485@gmail.com",
+        to: "anushree.ypo@gmail.com",
         cc: MailCCUsers,
         subject: "New User Request Received",
         html: NewRequestTemplate(),
@@ -360,7 +360,7 @@ const deleteUserbyChapterManager = async (req, res) => {
 
       const mailOptions = {
         from: process.env.EMAIL_SENDER_NAME,
-        to: "Harshmishra5485@gmail.com",
+        to: "anushree.ypo@gmail.com",
         cc: MailCCUsers,
         subject: "New User Request Received",
         html: NewRequestTemplate(),
@@ -1004,7 +1004,7 @@ const updateUserDetails = async (req, res) => {
 
       const mailOptions = {
         from: process.env.EMAIL_SENDER_NAME,
-        to: "Harshmishra5485@gmail.com",
+        to: "anushree.ypo@gmail.com",
         cc: MailCCUsers,
         subject: "New User Request Received",
         html: NewRequestTemplate(),
