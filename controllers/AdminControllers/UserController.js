@@ -413,6 +413,10 @@ const getAllUnderApprovalUsersData = async (req, res) => {
         const userRole = usersData._doc.accessLevel;
         const usersAssignedChapters = usersData._doc.Chapters;
 
+        const tobeUpdatedChapters = usersData._doc.tobeUpdatedChapter;
+        const tobeUpdatedAccesslevel = usersData._doc.tobeUpdatedAccesslevel;
+        const tobeUpdatedName = usersData._doc.tobeUpdatedName;
+
         const updatedChapters = await Promise.all(
           usersAssignedChapters.map(async (chapter) => {
             const chapterFilterQuery = {
@@ -422,15 +426,41 @@ const getAllUnderApprovalUsersData = async (req, res) => {
               chapterFilterQuery
             );
             return {
-              ...chapter,
+              chapter_id: ChapterData._doc._id,
               ChapterName: ChapterData?._doc?.chapter_Name || "Unknown",
             };
           })
         );
 
+        let tobeupdatedChapterswithNames = [];
+
+        if (tobeUpdatedChapters.length > 0) {
+          tobeupdatedChapterswithNames = await Promise.all(
+            tobeUpdatedChapters?.map(async (chapter) => {
+              const chapterFilterQuery = {
+                _id: chapter.chapter_id,
+              };
+              const ChapterData = await findOneChapterDataService(
+                chapterFilterQuery
+              );
+              return {
+                chapter_id: ChapterData._doc._id,
+                ChapterName: ChapterData?._doc?.chapter_Name || "Unknown",
+              };
+            })
+          );
+        }
+
         const updatedObj = {
-          ...usersData._doc,
+          member_id: usersData._doc.member_id,
+          userName: usersData._doc.userName,
+          Role: usersData._doc.Role,
           Chapters: updatedChapters,
+          tobeupdatedChapterswithNames: tobeupdatedChapterswithNames,
+          tobeUpdatedName: tobeUpdatedName ? tobeUpdatedRole : null,
+          Action: usersData._doc.Action,
+          _id: usersData._doc._id,
+          tobeUpdatedRole: null,
         };
 
         if (userRole == AccessLevel.Member) {
@@ -439,6 +469,14 @@ const getAllUnderApprovalUsersData = async (req, res) => {
 
         if (userRole == AccessLevel["Spouse/Partner"]) {
           updatedObj.Role = "Spouse/Partner";
+        }
+
+        if (tobeUpdatedAccesslevel == AccessLevel.Member) {
+          updatedObj.tobeUpdatedRole = "Member";
+        }
+
+        if (tobeUpdatedAccesslevel == AccessLevel["Spouse/Partner"]) {
+          updatedObj.tobeUpdatedRole = "Spouse/Partner";
         }
 
         return updatedObj;
