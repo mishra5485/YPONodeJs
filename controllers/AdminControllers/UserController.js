@@ -1467,7 +1467,12 @@ const downloadUserCard = async (req, res) => {
     const htmlContent = await renderTemplate(res, viewName, renderingData);
 
     // Generate the image using Puppeteer
-    const browser = await puppeteer.launch();
+    const browser = await puppeteer.launch({
+      headless: true,
+      executablePath: "/usr/bin/chromium-browser", // Specify the Chromium path directly
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    });
+
     const page = await browser.newPage();
 
     await page.setContent(htmlContent, { waitUntil: "load" });
