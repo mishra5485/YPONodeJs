@@ -22,6 +22,9 @@ const UsersSchema = new mongoose.Schema({
   Action: { type: String },
   resetPasswordToken: { type: String, default: undefined },
   resetPasswordExpires: { type: String, default: undefined },
+  tobeUpdatedName: { type: String, default: undefined },
+  tobeUpdatedAccesslevel: { type: Number, default: undefined },
+  tobeUpdatedChapter: [ChapterIdsSchema],
 });
 
 const Users = mongoose.model("Users", UsersSchema);

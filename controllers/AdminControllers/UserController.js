@@ -855,14 +855,33 @@ const updateUserDetails = async (req, res) => {
       return sendResponse(res, 404, true, "LoggedIn User not found");
     }
 
-    userName = userName ? userName.trim() : null;
-    Alias = Alias ? Alias.trim() : null;
-
     const userExists = await findOneUserDataService({
       _id: user_id,
     });
     if (!userExists) {
       return sendResponse(res, 404, true, "User not found");
+    }
+
+    userName = userName ? userName.trim() : null;
+    Alias = Alias ? Alias.trim() : null;
+
+    const loggedInUserIdRole = loggedInUserIdExists.accessLevel;
+    if (loggedInUserIdRole == AccessLevel.ChapterManager) {
+      if (userName != userExists.userName) {
+        userExists.tobeUpdatedName = userName;
+      }
+      if (Alias != userExists.accessLevel) {
+        userExists.tobeUpdatedAccesslevel = accessLevel;
+      }
+      if (Chapters && Chapters.length > 0) {
+        userExists.tobeUpdatedChapter = Chapters;
+      }
+
+      userExists.status = Status.UnderApproval;
+      userExists.Action = "Update";
+      await userExists.save();
+
+      return sendResponse(res, 200, false, "Sent for approval", userExists);
     }
 
     userExists.userName = userName;
