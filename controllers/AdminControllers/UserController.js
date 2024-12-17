@@ -457,7 +457,7 @@ const getAllUnderApprovalUsersData = async (req, res) => {
           Role: usersData._doc.Role,
           Chapters: updatedChapters,
           tobeupdatedChapterswithNames: tobeupdatedChapterswithNames,
-          tobeUpdatedName: tobeUpdatedName ? tobeUpdatedRole : null,
+          tobeUpdatedName: tobeUpdatedName ? tobeUpdatedName : null,
           Action: usersData._doc.Action,
           _id: usersData._doc._id,
           tobeUpdatedRole: null,
