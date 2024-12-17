@@ -514,6 +514,31 @@ const acceptApproval = async (req, res) => {
         return sendResponse(res, 500, true, "Error deleting User");
       }
     }
+
+    if (Operation == "Update") {
+      try {
+        const { tobeUpdatedName, tobeUpdatedChapter, tobeUpdatedAccesslevel } =
+          userData;
+
+        if (tobeUpdatedName) {
+          userData.userName = tobeUpdatedName;
+        }
+
+        if (tobeUpdatedChapter) {
+          userData.Chapters = tobeUpdatedChapter;
+        }
+
+        if (tobeUpdatedAccesslevel) {
+          userData.accessLevel = tobeUpdatedAccesslevel;
+        }
+        userData.status = Status.Active;
+        userData.save();
+        return sendResponse(res, 200, false, "Request Approved Successfully");
+      } catch (dbError) {
+        console.error("Error updating User from database:", dbError);
+        return sendResponse(res, 500, true, "Error deleting User");
+      }
+    }
   } catch (error) {
     console.error("Delete User Error:", error);
     return sendResponse(res, 500, true, "Internal Server Error");
