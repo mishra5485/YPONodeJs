@@ -845,7 +845,7 @@ const updateUserDetails = async (req, res) => {
       status: Status.Active,
     });
     if (!loggedInUserIdExists) {
-      return sendResponse(res, 404, true, "User not found");
+      return sendResponse(res, 404, true, "LoggedIn User not found");
     }
 
     userName = userName ? userName.trim() : null;
@@ -853,27 +853,15 @@ const updateUserDetails = async (req, res) => {
 
     const userExists = await findOneUserDataService({
       _id: user_id,
-      status: Status.Active,
     });
     if (!userExists) {
       return sendResponse(res, 404, true, "User not found");
     }
 
-    if (userName) {
-      userExists.userName = userName;
-    }
-
-    if (accessLevel) {
-      userExists.accessLevel = accessLevel;
-    }
-
-    if (Alias) {
-      userExists.Alias = Alias;
-    }
-
-    if (Chapters) {
-      userExists.Chapters = Chapters;
-    }
+    userExists.userName = userName;
+    userExists.accessLevel = accessLevel;
+    userExists.Alias = Alias;
+    userExists.Chapters = Chapters;
 
     await userExists.save();
     return sendResponse(
