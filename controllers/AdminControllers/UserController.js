@@ -585,7 +585,7 @@ const rejectApproval = async (req, res) => {
         const result = await deleteUserByIdService(deleteQuery);
 
         if (result.deletedCount === 1) {
-          return sendResponse(res, 200, false, "Request Approved Successfully");
+          return sendResponse(res, 200, false, "Request Rejected Successfully");
         } else {
           return sendResponse(res, 409, true, "Failed to Approve the Request");
         }
@@ -599,7 +599,32 @@ const rejectApproval = async (req, res) => {
       userData.status = Status.Active;
       userData.Action = null;
       userData.save();
-      return sendResponse(res, 200, false, "Request Approved Successfully");
+      return sendResponse(res, 200, false, "Request Rejected Successfully");
+    }
+
+    if (Operation == "Update") {
+      try {
+        const { tobeUpdatedName, tobeUpdatedChapter, tobeUpdatedAccesslevel } =
+          userData;
+
+        if (tobeUpdatedName) {
+          userData.tobeUpdatedName = null;
+        }
+
+        if (tobeUpdatedChapter) {
+          userData.tobeUpdatedName = [];
+        }
+
+        if (tobeUpdatedAccesslevel) {
+          userData.tobeUpdatedName = null;
+        }
+        userData.status = Status.Active;
+        userData.save();
+        return sendResponse(res, 200, false, "Request Rejected Successfully");
+      } catch (dbError) {
+        console.error("Error updating User from database:", dbError);
+        return sendResponse(res, 500, true, "Error deleting User");
+      }
     }
   } catch (error) {
     console.error("Delete User Error:", error);
