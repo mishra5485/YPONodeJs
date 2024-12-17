@@ -992,6 +992,27 @@ const updateUserDetails = async (req, res) => {
       userExists.Action = "Update";
       await userExists.save();
 
+      const transporter = nodemailer.createTransport({
+        host: process.env.EMAIL_SERVICE_HOST,
+        port: process.env.EMAIL_SERVICE_PORT,
+        secure: false,
+        auth: {
+          user: process.env.EMAIL_SERVICE_USERNAME,
+          pass: process.env.EMAIL_SERVICE_PASSWORD,
+        },
+      });
+
+      const mailOptions = {
+        from: process.env.EMAIL_SENDER_NAME,
+        to: "Harshmishra5485@gmail.com",
+        cc: MailCCUsers,
+        subject: "New User Request Received",
+        html: NewRequestTemplate(),
+      };
+
+      await transporter.sendMail(mailOptions);
+      console.log("Acknowledgment email sent to Superadmin");
+
       return sendResponse(res, 200, false, "Sent for approval", userExists);
     }
 
