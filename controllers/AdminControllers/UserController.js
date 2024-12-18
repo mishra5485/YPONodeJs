@@ -27,6 +27,7 @@ import getCurrentDateTime from "../../helpers/getCurrentDateTime.js";
 import { AccessLevel, Status, ServerBase_Url } from "../../helpers/Enum.js";
 import { getAsiaCalcuttaCurrentDateTimeinIsoFormat } from "../../helpers/DateTime.js";
 import { NewRequestTemplate } from "../../EmailTemplates/NewRequestTemplate.js";
+import { isProduction } from "../../config/index.js";
 
 const renderTemplate = (res, templateName, data) => {
   return new Promise((resolve, reject) => {
@@ -1461,17 +1462,28 @@ const downloadUserCard = async (req, res) => {
       userRole
     );
 
+    // const viewName =
+    //   userRole == AccessLevel.SuperAdmin ? "SuperAdminCard" : "OtherUsersCard";
+
     const viewName =
-      userRole == AccessLevel.SuperAdmin ? "SuperAdminCard" : "OtherUsersCard";
+      userRole == AccessLevel.SuperAdmin || userRole == AccessLevel.Others
+        ? "SuperAdminCard"
+        : "OtherUsersCard";
 
     const htmlContent = await renderTemplate(res, viewName, renderingData);
 
-    // Generate the image using Puppeteer
-    const browser = await puppeteer.launch({
-      headless: true,
-      executablePath: "/usr/bin/chromium-browser", // Specify the Chromium path directly
-      args: ["--no-sandbox", "--disable-setuid-sandbox"],
-    });
+    let browser;
+    if (isProduction == "true") {
+      browser = await puppeteer.launch({
+        headless: true,
+        executablePath: "/usr/bin/chromium-browser",
+        args: ["--no-sandbox", "--disable-setuid-sandbox"],
+      });
+    } else {
+      browser = await puppeteer.launch({
+        headless: true,
+      });
+    }
 
     const page = await browser.newPage();
 
